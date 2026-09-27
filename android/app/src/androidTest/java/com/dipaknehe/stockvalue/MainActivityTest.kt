@@ -3,10 +3,10 @@ package com.dipaknehe.stockvalue
 import android.app.Activity
 import android.app.Instrumentation.ActivityResult
 import android.content.Intent
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.GeneralClickAction
 import androidx.test.espresso.action.Press
 import androidx.test.espresso.action.Tap
@@ -34,6 +34,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -136,12 +137,14 @@ class MainActivityTest {
 
     @Test
     fun linksWithinTheSiteStayInTheAppAndBackReturns() {
-        launch().use {
+        launch().use { scenario ->
             titleIs("Home")
             onWebView().withElement(findElement(Locator.ID, "internal")).perform(webClick())
             titleIs("Next")
-            pressBack()
+            // Back through the activity's back dispatcher: the path the system back gesture and button take.
+            scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
             titleIs("Home")
+            assertEquals(Lifecycle.State.RESUMED, scenario.state)   // went back a page instead of leaving the app
         }
     }
 

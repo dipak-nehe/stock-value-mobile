@@ -59,11 +59,15 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
+          # On failure, keep the emulator's system log (app crashes and the app's own log lines) for the report.
+          script: ./gradlew connectedDebugAndroidTest || { adb logcat -d > app/build/reports/logcat.txt; exit 1; }
 
       - name: Upload the test report
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: emulator-test-report
-          path: app/build/reports/androidTests/connected/
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/reports/logcat.txt
+          if-no-files-found: ignore
