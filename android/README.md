@@ -68,13 +68,13 @@ GitHub Actions (`.github/workflows/android.yml`) runs three jobs on every push: 
 `e2e/` is a TypeScript test framework that drives the installed app the way a person does, through **WebdriverIO 9**, **Appium 3** and the **UiAutomator2** driver, and writes an **Allure** report.
 
 - **Hybrid:** steps switch between the native app (toolbar star, Watchlist, notification shade, offline screen, Back) and the page inside the WebView (`inWebView(...)` switches Appium to the `WEBVIEW_…` context; chromedriver is downloaded to match the device's WebView). Debug builds turn on WebView debugging for this.
-- **Two suites (25 tests):**
+- **Two suites (31 tests):**
   - `mock`: exact checks against a small local copy of the web app (`support/mockSite.ts`), reached from the device through `adb reverse`. The tests change its "SEC filings" to trigger a real notification, then tap it.
     - browsing and Back, the user agent, the offline screen and *Try again*;
     - the full watch → notification → open → unwatch flow;
     - **accessibility**: on every native screen (start, results, Watchlist with a company and empty, offline) each tappable control needs a screen-reader label and a 48dp touch target (`support/a11y.ts` reads the UI tree); the page inside the WebView is checked with **axe-core** (WCAG 2.1 A/AA);
     - **Spanish**: the app is switched to Spanish with Android 13+'s per-app language setting; toolbar, Watchlist, a real notification and the offline screen must be in Spanish.
-  - `live`: against https://stock-value-analysis.vercel.app with real SEC data: loads the site, analyses KO, shows the Watch star, shows the site in Spanish inside the app, and runs axe-core on the live start and results pages.
+  - `live`: against https://stock-value-analysis.vercel.app with real SEC data: loads the site, analyses KO, shows the Watch star, shows the site in Spanish inside the app, and runs axe-core on the live start and results pages. **Compare:** opens *Compare with another stock* inside the app with KO loaded, compares PEP (cards, key figures, chart), runs axe-core on the compare page, follows *Open full analysis* and Back (the Watch star appears on a company page and disappears on the comparison), and checks the comparison in Spanish.
 - **Structure:** `wdio.conf.ts` (runner, Appium service, reporters, failure screenshots), `support/capabilities.ts` (Android/UiAutomator2 capabilities), `support/app.ts` (launch with intent extras, reset, adb, WebView switching, selectors), `screens/` (screen objects), `specs/mock/` and `specs/live/`.
 - **Allure:** a named screenshot after every test (passed or failed) and at key steps (the notification shade with the alerts, the screens in Spanish), the accessibility findings as JSON, and the native UI tree on failure. CI uploads a single-file report as the **appium-allure-report** artifact.
 - **CI stability:** the job frees disk space for the emulator, warms the device up before testing, and re-runs a failed spec file once (`specFileRetries`, CI only). A real failure fails twice and still fails the job.
