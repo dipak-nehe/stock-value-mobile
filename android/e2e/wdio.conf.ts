@@ -1,6 +1,6 @@
 import allureReporter from '@wdio/allure-reporter';
 import { androidCapabilities } from './support/capabilities.js';
-import { screenshot } from './support/report.js';
+import { attachVideo, screenshot, startVideo } from './support/report.js';
 
 /**
  * WebdriverIO + Appium (UiAutomator2) for the Android app.
@@ -68,9 +68,14 @@ export const config: WebdriverIO.Config = {
         ],
     ],
 
-    // Every test ends with a screenshot in the Allure report; failures also get the native screen's UI tree.
+    // Every test gets a video and ends with a screenshot in the Allure report; failures also get the native screen's UI tree.
+    beforeTest: async () => {
+        await startVideo();
+    },
+
     afterTest: async (test, _context, { passed }) => {
         await screenshot(`${passed ? 'screen after' : 'screen at failure'}: ${test.title}`);
+        await attachVideo(`video: ${test.title}`);
         if (passed) return;
         try {
             await driver.switchContext('NATIVE_APP');

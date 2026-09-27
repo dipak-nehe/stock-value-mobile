@@ -207,7 +207,7 @@ Also stored: the WebView's own data (the web app remembers the chosen language i
 
 ```mermaid
 flowchart TB
-    e2e["End-to-end: WebdriverIO + Appium (UiAutomator2)<br/>31 tests · native + WebView · mock and live site<br/>accessibility · Spanish · compare · Allure screenshots"]
+    e2e["End-to-end: WebdriverIO + Appium (UiAutomator2)<br/>31 tests · native + WebView · mock and live site<br/>accessibility · Spanish · compare · Allure screenshots + video"]
     inst["Instrumented: Espresso + Espresso-Web + WorkManager testing<br/>10 tests · MockWebServer"]
     unit["JVM unit tests: 20 tests<br/>SitePolicy · SiteUrls · AlertRules · JSON · API version"]
     lint["Android Lint (warnings = errors)"]
@@ -252,7 +252,7 @@ flowchart LR
 - **Suites:** `mock` (navigation, offline, watch → notification → open → unwatch, accessibility of every native screen, Spanish) and `live` (smoke, accessibility of live pages, compare KO vs PEP, Spanish).
 - **Hybrid steps** switch between `NATIVE_APP` (toolbar, Watchlist, notification shade) and the app's WebView context (page content), reconnecting after each page change.
 - **Accessibility:** native controls need a spoken label and a 48 dp touch target (from the UI tree); web pages run axe-core (WCAG 2.1 A/AA) inside the app.
-- **Allure** gets a named screenshot after every test and at key steps, accessibility findings as JSON, and the native UI tree on failure.
+- **Allure** gets a video of every test, a named screenshot after every test and at key steps, accessibility findings as JSON, and the native UI tree on failure.
 
 ---
 
