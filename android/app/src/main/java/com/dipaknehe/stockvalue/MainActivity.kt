@@ -105,14 +105,19 @@ class MainActivity : ComponentActivity() {
         refresh.setOnChildScrollUpCallback { _, _ -> webView.scrollY > 0 }
         findViewById<Button>(R.id.retry).setOnClickListener { reload() }
 
-        if (savedInstanceState == null || webView.restoreState(savedInstanceState) == null) {
-            webView.loadUrl(pageFrom(intent) ?: siteUrl)
+        // A requested page (notification, Watchlist) wins over the page restored from before.
+        val requested = pageFrom(intent)
+        if (requested != null) {
+            webView.loadUrl(requested)
+        } else if (savedInstanceState == null || webView.restoreState(savedInstanceState) == null) {
+            webView.loadUrl(siteUrl)
         }
     }
 
     // A notification or the Watchlist screen asked for a page while the app was already open.
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        setIntent(intent)
         pageFrom(intent)?.let {
             mainFrameFailed = false
             back.isEnabled = true

@@ -19,7 +19,7 @@ describe('Browsing the web app inside the app', () => {
     });
 
     it('shows the site in the WebView with the Watchlist action and no Watch star on the start page', async () => {
-        await expect(MainScreen.webView).toBeDisplayed();
+        await expect(MainScreen.pageArea).toBeDisplayed();
         await inWebView(async () => {
             await expect($('#title')).toHaveText('Home');
         });
@@ -41,6 +41,6 @@ describe('Browsing the web app inside the app', () => {
         await inWebView(async () => {
             await expect($('#title')).toHaveText('Home');
         });
-        await expect(MainScreen.webView).toBeDisplayed(); // still in the app
+        await expect(MainScreen.pageArea).toBeDisplayed(); // still in the app
     });
 });

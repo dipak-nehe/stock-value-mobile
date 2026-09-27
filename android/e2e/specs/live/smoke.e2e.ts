@@ -9,16 +9,11 @@ describe('Live site smoke test', () => {
         await launchApp(); // no override: https://stock-value-analysis.vercel.app
     });
 
-    it('loads the live web app', async () => {
+    it('loads the live web app and analyses a company from real SEC data', async () => {
+        // One switch into the page for the whole web flow.
         await inWebView(async () => {
             await expect($('h1')).toHaveText(expect.stringContaining('10-Year Stock Value Analysis'), { wait: 60_000 });
             await expect($('#go')).toBeEnabled({ wait: 30_000 }); // the page's script has loaded
-        });
-        await expect(MainScreen.anyWatchButton).not.toBeExisting();
-    });
-
-    it('analyses a company from real SEC data', async () => {
-        await inWebView(async () => {
             await $('#ticker').setValue('KO');
             await $('#go').click();
             await expect($('#coName')).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });

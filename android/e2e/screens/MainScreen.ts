@@ -27,8 +27,12 @@ class MainScreen {
         return $(byId('retry'));
     }
 
-    get webView() {
-        return $(byId('web'));
+    /**
+     * The area holding the web page. (The WebView's own accessibility node is replaced as the page renders,
+     * so UiAutomator2 reports it as stale; its container is stable.)
+     */
+    get pageArea() {
+        return $(byId('refresh'));
     }
 
     async openWatchlist(): Promise<void> {

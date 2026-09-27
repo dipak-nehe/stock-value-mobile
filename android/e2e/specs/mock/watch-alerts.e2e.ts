@@ -64,13 +64,11 @@ describe('Filing alerts', () => {
         site.requests.length = 0;
         await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
         await Notifications.notification('Filed a new 10-Q on 2026-07-29').click();
-        await browser.waitUntil(async () => site.requests.includes('/?t=KO'), {
-            timeout: 30_000,
-            timeoutMsg: `the app never opened /?t=KO (requests: ${site.requests.join(', ')})`,
-        });
         await inWebView(async () => {
-            await expect($('#title')).toHaveText('KO results');
+            await expect($('#title')).toHaveText('KO results', { wait: 30_000 });
+            await expect(browser).toHaveUrl(expect.stringContaining('/?t=KO'));
         });
+        expect(site.requests).toContain('/?t=KO'); // the page was really requested after the tap
     });
 
     it('can stop watching from the Watchlist', async () => {
