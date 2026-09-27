@@ -43,10 +43,14 @@ export async function resetApp(): Promise<void> {
  * `open` opens a particular page, as a notification tap does.
  */
 export async function launchApp(options: { site?: string; open?: string } = {}): Promise<void> {
-    const extras: string[][] = [];
-    if (options.site) extras.push(['s', EXTRA_SITE_URL, options.site]);
-    if (options.open) extras.push(['s', EXTRA_OPEN_URL, options.open]);
-    await driver.execute('mobile: startActivity', { component: MAIN_ACTIVITY, extras, stop: true, wait: true });
+    // Through host adb with each value single-quoted for the device shell: addresses contain '&', which an unquoted
+    // shell command (as `mobile: startActivity` builds it) treats as "run in background" and cuts the address there.
+    const quote = (v: string) => `'${v.replace(/'/g, `'\\''`)}'`;
+    const extras: string[] = [];
+    if (options.site) extras.push('--es', EXTRA_SITE_URL, quote(options.site));
+    if (options.open) extras.push('--es', EXTRA_OPEN_URL, quote(options.open));
+    adb('shell', 'am', 'start', '-S', '-n', MAIN_ACTIVITY, ...extras);
+    await driver.pause(500);
 }
 
 const contextName = (c: unknown): string => (typeof c === 'string' ? c : String((c as { id?: string }).id ?? ''));
