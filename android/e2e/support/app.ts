@@ -26,16 +26,15 @@ export function removeReverse(devicePort: number): void {
     }
 }
 
-/** Stops the app and wipes its data (watchlist, WebView storage), then re-grants notifications. */
+/**
+ * Stops the app and wipes its data (watchlist, WebView storage), then re-grants notifications (clearing revokes them).
+ * Uses host-side adb rather than Appium's `mobile: shell`, which Appium 3 only allows with --allow-insecure.
+ */
 export async function resetApp(): Promise<void> {
     await driver.execute('mobile: terminateApp', { appId: APP_ID });
     await driver.execute('mobile: clearApp', { appId: APP_ID });
-    if (Number(await driver.execute('mobile: shell', { command: 'getprop', args: ['ro.build.version.sdk'] })) >= 33) {
-        await driver.execute('mobile: changePermissions', {
-            permissions: 'android.permission.POST_NOTIFICATIONS',
-            appPackage: APP_ID,
-            action: 'grant',
-        });
+    if (Number(adb('shell', 'getprop', 'ro.build.version.sdk').trim()) >= 33) {
+        adb('shell', 'pm', 'grant', APP_ID, 'android.permission.POST_NOTIFICATIONS');
     }
 }
 
