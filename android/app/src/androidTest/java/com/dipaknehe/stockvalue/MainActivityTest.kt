@@ -139,7 +139,9 @@ class MainActivityTest {
     fun linksWithinTheSiteStayInTheAppAndBackReturns() {
         launch().use { scenario ->
             titleIs("Home")
-            onWebView().withElement(findElement(Locator.ID, "internal")).perform(webClick())
+            // A real tap: Chrome's history intervention makes Back skip a page that was left without a user gesture,
+            // so a scripted click wouldn't leave anything to go back to.
+            tapElement("internal")
             titleIs("Next")
             // Back through the activity's back dispatcher: the path the system back gesture and button take.
             scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }

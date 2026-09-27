@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Message
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.RenderProcessGoneDetail
@@ -36,7 +35,6 @@ class MainActivity : ComponentActivity() {
         /** Debug builds only: load this address instead of the live site (used by the instrumented tests). */
         const val EXTRA_SITE_URL = "com.dipaknehe.stockvalue.SITE_URL"
         const val USER_AGENT_TAG = "StockValueAndroid"
-        private const val TAG = "StockValue"
     }
 
     private lateinit var siteUrl: String
@@ -52,7 +50,6 @@ class MainActivity : ComponentActivity() {
     // system's predictive "back to home" animation works there. When pressed it checks the live history.
     private val back = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
-            Log.d(TAG, "back: canGoBack=${webView.canGoBack()} url=${webView.url}")
             if (webView.canGoBack()) {
                 webView.goBack()
             } else {
