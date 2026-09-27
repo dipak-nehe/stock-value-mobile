@@ -37,6 +37,9 @@ class AlertNotifier(private val context: Context, private val siteUrl: String) {
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setAutoCancel(true)
+            // Each alert is its own group: otherwise Android bundles an app's notifications into a summary whose
+            // tap opens the app's start page instead of the company.
+            .setGroup("alert-$id")
             .setContentIntent(PendingIntent.getActivity(context, id, open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
             .build()
         try {

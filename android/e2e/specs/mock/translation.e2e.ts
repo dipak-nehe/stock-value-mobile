@@ -3,7 +3,7 @@ import MainScreen from '../../screens/MainScreen.js';
 import Notifications from '../../screens/Notifications.js';
 import WatchlistScreen from '../../screens/WatchlistScreen.js';
 import { MockSite, type Report } from '../../support/mockSite.js';
-import { byText, byTextContains, launchApp, removeReverse, resetApp, reversePort, setAppLanguage } from '../../support/app.js';
+import { byButtonText, byTextContains, launchApp, removeReverse, resetApp, reversePort, setAppLanguage } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
 const Q2: Report = { form: '10-Q', date: '2026-04-28', accession: '0000021344-26-000010', url: 'https://www.sec.gov/q2.htm' };
@@ -38,7 +38,7 @@ describe('Spanish (per-app language)', () => {
         await $('~Seguir las presentaciones de KO').click();
         await expect($('~Siguiendo KO (toca para dejar de seguir)')).toBeDisplayed();
         await $('~Seguimiento').click();
-        await expect($(byText('Comprobar ahora'))).toBeDisplayed();
+        await expect($(byButtonText('Comprobar ahora'))).toBeDisplayed();
         await expect($(byTextContains('Recibirás una notificación'))).toBeDisplayed();
         await WatchlistScreen.waitForDetail('Último informe: 10-Q presentado el 2026-04-28');
         await screenshot('Watchlist in Spanish');
@@ -46,7 +46,7 @@ describe('Spanish (per-app language)', () => {
 
     it('sends the filing alert in Spanish', async () => {
         site.report = Q3;
-        await $(byText('Comprobar ahora')).click();
+        await $(byButtonText('Comprobar ahora')).click();
         await Notifications.waitFor('Ha presentado un nuevo 10-Q el 2026-07-29');
         await screenshot('Spanish notification');
         await Notifications.close();
@@ -57,7 +57,7 @@ describe('Spanish (per-app language)', () => {
         await expect(WatchlistScreen.emptyMessage).toHaveText(expect.stringContaining('Aún no sigues ninguna empresa'));
         await launchApp({ site: 'http://localhost:8767/' });
         await expect(MainScreen.offlineTitle).toHaveText('No se puede acceder al sitio', { wait: 30_000 });
-        await expect($(byText('Reintentar'))).toBeDisplayed();
+        await expect($(byButtonText('Reintentar'))).toBeDisplayed();
         await screenshot('offline screen in Spanish');
     });
 });

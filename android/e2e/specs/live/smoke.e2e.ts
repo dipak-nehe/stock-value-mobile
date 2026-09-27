@@ -35,7 +35,7 @@ describe('Live site smoke test', () => {
             await expect($('#go')).toHaveText('Analizar', { wait: 60_000 });
             await expect($('#coName')).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
             await expect($('#tab-flags')).toHaveText(expect.stringContaining('Señales'));
-        });
+        }, { retries: 1 });
         await screenshot('live results in Spanish');
     });
 });

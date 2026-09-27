@@ -120,6 +120,24 @@ class MainActivityTest {
         }
     }
 
+    private fun tapUntil(id: String, title: String, attempts: Int = 3) {
+        repeat(attempts) { attempt ->
+            tapElement(id)
+            val deadline = System.currentTimeMillis() + 3_000
+            while (System.currentTimeMillis() < deadline) {
+                try {
+                    onWebView().withElement(findElement(Locator.ID, "title")).check(
+                        androidx.test.espresso.web.assertion.WebViewAssertions.webMatches(getText(), org.hamcrest.Matchers.equalTo(title)),
+                    )
+                    return
+                } catch (e: Throwable) {
+                    if (attempt == attempts - 1 && System.currentTimeMillis() + 200 >= deadline) throw e
+                    Thread.sleep(200)
+                }
+            }
+        }
+    }
+
     private fun titleIs(text: String) = eventually {
         onWebView().withElement(findElement(Locator.ID, "title")).check(
             androidx.test.espresso.web.assertion.WebViewAssertions.webMatches(getText(), org.hamcrest.Matchers.equalTo(text)),
@@ -141,8 +159,8 @@ class MainActivityTest {
             titleIs("Home")
             // A real tap: Chrome's history intervention makes Back skip a page that was left without a user gesture,
             // so a scripted click wouldn't leave anything to go back to.
-            tapElement("internal")
-            titleIs("Next")
+            // Retry the tap (after giving each one 3 s to navigate) if it lands before the page is ready for input.
+            tapUntil("internal", "Next")
             // Back through the activity's back dispatcher: the path the system back gesture and button take.
             scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
             titleIs("Home")
