@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher label: short so it isn't cut off under the icon. The page itself shows the full name. -->
+    <string name="app_name" translatable="false">Stock Value</string>
+    <string name="offline_title">Can\'t reach the site</string>
+    <string name="offline_message">Check your internet connection and try again.</string>
+    <string name="retry">Try again</string>
+    <string name="no_app_for_link">No app found to open this link</string>
+</resources>

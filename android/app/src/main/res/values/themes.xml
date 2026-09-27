@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A light theme tells the WebView to report prefers-color-scheme: light; values-night switches both. -->
+    <style name="Theme.StockValue" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/page</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+</resources>

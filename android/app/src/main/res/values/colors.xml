@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Same values as the web app page, text and accent colours, so there is no flash of a different colour. -->
+    <color name="page">#F9F9F7</color>
+    <color name="text">#0B0B0B</color>
+    <color name="text_secondary">#52514E</color>
+    <color name="accent">#2166B8</color>
+    <color name="icon_background">#2166B8</color>
+</resources>
