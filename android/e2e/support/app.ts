@@ -60,10 +60,10 @@ const contextName = (c: unknown): string => (typeof c === 'string' ? c : String(
  * Other apps on the device (e.g. Google system apps) have WebViews too, so pick this app's by name; a context can
  * also vanish between listing and switching while the page loads, so retry the switch.
  */
-export async function inWebView<T>(fn: () => Promise<T>, options: { retries?: number } = {}): Promise<T> {
+/** Switch Appium to this app's WebView, waiting for it to appear (chromedriver on an older WebView can take a minute). */
+async function switchToWebView(): Promise<void> {
     const ours = `WEBVIEW_${APP_ID}`;
     let lastError = 'no attempt finished';
-    // Starting chromedriver against an older WebView can take a minute on CI, so allow a few attempts.
     await browser.waitUntil(
         async () => {
             const contexts = (await driver.getContexts()).map(contextName);
@@ -83,16 +83,20 @@ export async function inWebView<T>(fn: () => Promise<T>, options: { retries?: nu
     ).catch(() => {
         throw new Error(`could not switch to the app's WebView: ${lastError}`);
     });
+}
+
+export async function inWebView<T>(fn: () => Promise<T>, options: { retries?: number } = {}): Promise<T> {
+    await switchToWebView();
     try {
         for (let attempt = 0; ; attempt++) {
             try {
                 return await fn();
             } catch (e) {
                 // The page can restart under chromedriver right after the app launches; read-only checks may retry.
-                if (attempt >= (options.retries ?? 0) || !/not connected to DevTools|chrome not reachable|target window already closed/i.test(String(e))) throw e;
+                if (attempt >= (options.retries ?? 0) || !/not connected to DevTools|chrome not reachable|target window already closed|no such context/i.test(String(e))) throw e;
                 await browser.pause(3_000);
                 await driver.switchContext('NATIVE_APP');
-                await driver.switchContext(ours);
+                await switchToWebView(); // wait for the page to reappear, as on the first switch
             }
         }
     } finally {
