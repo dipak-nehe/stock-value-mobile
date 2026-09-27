@@ -61,7 +61,31 @@ To install on a phone without Android Studio: download the **stock-value-debug-a
 | **Emulator** (Espresso + Espresso-Web + WorkManager testing, 10 tests) | `app/src/androidTest/…` | Against a local test server. `MainActivityTest`: the page loads and the user agent names the app; a link within the site stays in the app and Back returns; external and new-tab links go to the browser; the offline screen appears and *Try again* recovers. `WatchTest`: the Watch button shows only on a results page; watching records the starting point without alerts and shows in the Watchlist, where it can be removed; a check posts exactly the expected notifications once; an unknown ticker doesn't stop the others; a notification opens the company's page |
 | **Lint** | `./gradlew lintDebug` | Android Lint with warnings as errors (version-update checks are left to Dependabot) |
 
-GitHub Actions (`.github/workflows/android.yml`) runs the unit tests, lint and a debug build on every push, uploads the APK, and runs the emulator tests on an Android 14 emulator.
+GitHub Actions (`.github/workflows/android.yml`) runs three jobs on every push: unit tests, lint and the debug APK (uploaded); the Espresso tests on an Android 14 emulator; and the WebdriverIO + Appium suites on another emulator, with the Allure report uploaded.
+
+## End-to-end tests (WebdriverIO + Appium)
+
+`e2e/` is a TypeScript test framework that drives the installed app the way a person does, through **WebdriverIO 9**, **Appium 3** and the **UiAutomator2** driver, and writes an **Allure** report.
+
+- **Hybrid:** steps switch between the native app (toolbar star, Watchlist, notification shade, offline screen, Back) and the page inside the WebView (`inWebView(...)` switches Appium to the `WEBVIEW_…` context; chromedriver is downloaded to match the device's WebView). Debug builds turn on WebView debugging for this.
+- **Two suites:**
+  - `mock`: exact checks against a small local copy of the web app (`support/mockSite.ts`), reached from the device through `adb reverse`. The tests change its "SEC filings" to trigger a real notification, then tap it. Covers browsing and Back, the user agent, the offline screen and *Try again*, and the full watch → notification → open → unwatch flow.
+  - `live`: a smoke test against https://stock-value-analysis.vercel.app with real SEC data. It loads the site, analyses KO, and checks the Watch star appears.
+- **Structure:** `wdio.conf.ts` (runner, Appium service, reporters, failure screenshots), `support/capabilities.ts` (Android/UiAutomator2 capabilities), `support/app.ts` (launch with intent extras, reset, adb, WebView switching, selectors), `screens/` (screen objects), `specs/mock/` and `specs/live/`.
+- **Allure:** every test result, with a screenshot and the native UI tree attached on failure. CI uploads a single-file report as the **appium-allure-report** artifact.
+
+Run locally (needs Node 20.19+, a running emulator or a USB-connected phone with USB debugging, and the Android SDK's `adb`):
+
+```bash
+./gradlew assembleDebug          # the APK the tests install
+cd e2e
+npm ci                           # WebdriverIO, Appium and the UiAutomator2 driver (local, nothing global)
+npm run appium:drivers           # should list uiautomator2
+npm run test:mock                # or: npm run test:live, npm test (both)
+npm run report && npm run report:open
+```
+
+Useful variables: `ANDROID_SERIAL` (pick a device), `APK_PATH` (another APK), `ANDROID_HOME` (where `adb` is).
 
 ## Project structure
 
@@ -80,6 +104,7 @@ app/src/debug/res/xml/   debug-only network security config for the tests' local
 app/src/test/            JVM unit tests
 app/src/androidTest/     emulator tests
 gradle/libs.versions.toml  dependency versions
+e2e/                     WebdriverIO + Appium end-to-end tests (TypeScript) and Allure report
 ```
 
 ## Not included yet
