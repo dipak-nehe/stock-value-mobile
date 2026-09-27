@@ -20,9 +20,12 @@ describe('Compare two stocks in the app (live site)', () => {
         await inWebView(async () => {
             await expect($('#coName')).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
             await $('#compareLink').click();
+        });
+        // A new page: reconnect instead of keeping chromedriver on the old one (the CI WebView drops it).
+        await inWebView(async () => {
             await expect(browser).toHaveUrl(expect.stringContaining('/compare.html?a=KO'), { wait: 30_000 });
             await expect($('#statusA')).toHaveText('COCA COLA CO (KO)', { wait: 60_000 });
-        });
+        }, { retries: 1 });
         await expect(MainScreen.pageArea).toBeDisplayed(); // still in the app, not the browser
         await expect(MainScreen.anyWatchButton).not.toBeExisting(); // the compare page isn't one company
         await screenshot('compare page with KO loaded');
@@ -51,8 +54,10 @@ describe('Compare two stocks in the app (live site)', () => {
     it('"Open full analysis" stays in the app and brings back the Watch star', async () => {
         await inWebView(async () => {
             await $('#cmpCards .cmp-card:nth-child(2) a').click(); // PEP's card
-            await expect($('#coName')).toHaveText('PEPSICO INC (PEP)', { wait: 90_000 });
         });
+        await inWebView(async () => {
+            await expect($('#coName')).toHaveText('PEPSICO INC (PEP)', { wait: 90_000 });
+        }, { retries: 1 });
         await expect(MainScreen.watchButton('PEP')).toBeDisplayed({ wait: 20_000 });
     });
 
@@ -61,7 +66,7 @@ describe('Compare two stocks in the app (live site)', () => {
         await inWebView(async () => {
             await expect(browser).toHaveUrl(expect.stringContaining('compare.html'), { wait: 30_000 });
             await expect($('#cmpResult')).toBeDisplayed({ wait: 90_000 }); // both companies restored from the address
-        });
+        }, { retries: 1 });
         await expect(MainScreen.anyWatchButton).not.toBeExisting();
     });
 

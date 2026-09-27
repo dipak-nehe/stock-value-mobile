@@ -59,8 +59,11 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          # On failure, keep the emulator's system log (app crashes and the app's own log lines) for the report.
-          script: ./gradlew connectedDebugAndroidTest || { adb logcat -d > app/build/reports/logcat.txt; exit 1; }
+          # Hide system "isn't responding" dialogs (they take window focus from the app under test) and let the freshly
+          # booted device settle. On failure, keep the emulator's system log (app crashes and the app's own log lines).
+          script: |
+            adb shell settings put global hide_error_dialogs 1 && sleep 45
+            ./gradlew connectedDebugAndroidTest || { adb logcat -d > app/build/reports/logcat.txt; exit 1; }
 
       - name: Upload the test report
         if: always()
@@ -128,6 +131,7 @@ jobs:
           # fail its first attempt. Install and open the app once, then let the device settle before testing.
           # On failure, keep the device log (the app logs each page it loads in debug builds).
           script: |
+            adb shell settings put global hide_error_dialogs 1
             adb install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -W -n com.dipaknehe.stockvalue/.MainActivity && sleep 45 && adb shell am force-stop com.dipaknehe.stockvalue
             cd e2e && npm test || { adb logcat -d > logs/logcat.txt; exit 1; }
 
