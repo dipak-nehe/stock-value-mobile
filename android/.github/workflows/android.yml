@@ -121,8 +121,12 @@ jobs:
           target: google_apis
           disable-animations: true
           disk-size: 4096M
+          # Warm-up: a freshly booted emulator is busy (Google Play services updating), and the first spec used to
+          # fail its first attempt. Install and open the app once, then let the device settle before testing.
           # On failure, keep the device log (the app logs each page it loads in debug builds).
-          script: cd e2e && npm test || { adb logcat -d > logs/logcat.txt; exit 1; }
+          script: |
+            adb install -r app/build/outputs/apk/debug/app-debug.apk && adb shell am start -W -n com.dipaknehe.stockvalue/.MainActivity && sleep 45 && adb shell am force-stop com.dipaknehe.stockvalue
+            cd e2e && npm test || { adb logcat -d > logs/logcat.txt; exit 1; }
 
       - name: Build the Allure report
         if: always()
