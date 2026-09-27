@@ -2,9 +2,10 @@ import SwiftUI
 import UIKit
 import UserNotifications
 
-/// The app's entry point.
+/// The app's entry point (`@main`): iOS starts here and shows RootView in a window.
 @main
 struct StockValueApp: App {
+    // Connects the classic AppDelegate (below) for the parts SwiftUI doesn't cover: background tasks, notification taps.
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
@@ -24,7 +25,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         return true
     }
 
-    // Show alerts even while the app is open.
+    // Show alerts even while the app is open (otherwise iOS only shows them when the app is in the background).
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async
         -> UNNotificationPresentationOptions {
         [.banner, .list, .sound]

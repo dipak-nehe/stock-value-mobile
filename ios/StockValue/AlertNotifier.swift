@@ -14,6 +14,7 @@ struct AlertNotifier {
     func post(_ alert: Alert, siteURL: String) async {
         let content = UNMutableNotificationContent()
         let tab: String?
+        // Swift notes: `case let .newReport(ticker, name, report)` matches that kind of alert and names its values.
         switch alert {
         case let .newReport(ticker, name, report):
             content.title = String(format: String(localized: "alert_title"), name, ticker)
@@ -25,6 +26,7 @@ struct AlertNotifier {
             tab = "history"
         }
         content.sound = .default
+        // The page to open when tapped (AppDelegate reads it). trigger: nil = show now.
         content.userInfo = ["url": SiteURLs.results(siteURL: siteURL, ticker: alert.ticker, tab: tab)]
         let request = UNNotificationRequest(identifier: Self.id(for: alert), content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(request)

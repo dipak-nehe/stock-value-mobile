@@ -35,6 +35,7 @@ enum FilingChecks {
     }
 
     /// One check: asks the web app about each watched company and posts a notification for anything new.
+    /// Returns false if any company couldn't be checked (network problem). `@discardableResult`: callers may ignore it.
     @discardableResult
     static func run(siteURL: String, store: WatchStore = WatchStore(), notifier: AlertNotifier = AlertNotifier()) async -> Bool {
         let api = StatusAPI(siteURL: siteURL)
@@ -43,6 +44,7 @@ enum FilingChecks {
             if Task.isCancelled { break }
             do {
                 let status = try await api.fetch(watched.ticker)
+                // Decide what's new, save the new state, then notify. `let (a, b) = …` unpacks the returned pair.
                 let (updated, alerts) = AlertRules.check(before: watched, now: status, checkedAt: Date())
                 store.update(updated)
                 for alert in alerts { await notifier.post(alert, siteURL: siteURL) }

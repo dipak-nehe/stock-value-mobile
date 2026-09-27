@@ -1,14 +1,28 @@
 import SwiftUI
 
+// The app's screens, written in SwiftUI: each `View` describes what to show for the current state, and SwiftUI
+// redraws it when that state changes.
+//
+// WHERE TO CHANGE THINGS:
+//  - toolbar buttons: the `.toolbar { … }` block in RootView
+//  - the offline screen: OfflineView; the Watchlist: WatchlistView
+//  - texts: en.lproj/Localizable.strings and es.lproj/Localizable.strings (Text("key") looks the key up there)
+//  - accessibility identifiers ("watch-button", …) are what the end-to-end tests find; keep them stable
+
 /// The main screen: the web app, with the Watch star, the Watchlist button and Back in the toolbar.
 struct RootView: View {
+    // Swift notes: @EnvironmentObject = shared state handed down from the app (AppModel);
+    // @StateObject = an object this view creates once and keeps; @State = small values owned by this view.
+    // Changing any of them redraws the view.
     @EnvironmentObject var model: AppModel
     @StateObject private var web = WebController(model: AppModel.shared)
     @State private var showWatchlist = false
-    @State private var toast: String?
+    @State private var toast: String? // a short message shown for 3 s (e.g. "Watching KO…")
 
     var body: some View {
         NavigationStack {
+            // ZStack layers views on top of each other: the web page, then (when needed) the offline panel,
+            // the loading bar and the toast.
             ZStack(alignment: .top) {
                 WebView(controller: web)
                     .opacity(web.failed ? 0 : 1)
@@ -32,6 +46,8 @@ struct RootView: View {
             .navigationTitle(Text("app_name"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // Left: Back (only when the page has history). Right: the Watch star (only on a company's page)
+                // and the Watchlist button.
                 ToolbarItem(placement: .topBarLeading) {
                     if web.canGoBack {
                         Button { web.goBack() } label: { Image(systemName: "chevron.backward") }
@@ -55,11 +71,14 @@ struct RootView: View {
                         .accessibilityIdentifier("watchlist-button")
                 }
             }
+            // `$showWatchlist` passes a binding: the Watchlist opens when it's true and sets it back when closed.
             .navigationDestination(isPresented: $showWatchlist) { WatchlistView() }
         }
+        // First appearance: open the requested page (debug launch argument) or the site's start page.
         .onAppear {
             web.load(AppInfo.launchPage.flatMap { SitePolicy(siteURL: model.siteURL).target(for: $0) == .app ? $0 : nil } ?? model.siteURL)
         }
+        // A notification or the Watchlist asked for a page: go back to the web view and load it.
         .onChange(of: model.pageToOpen) { _, page in
             guard let page else { return }
             showWatchlist = false
@@ -68,6 +87,7 @@ struct RootView: View {
         }
     }
 
+    /// Show a short message for 3 seconds. `guard let x else { return }` leaves early when x is nil.
     private func show(_ message: String?) {
         guard let message else { return }
         toast = message
@@ -80,7 +100,7 @@ struct RootView: View {
 
 /// Shown when the site can't be reached.
 struct OfflineView: View {
-    let retry: () -> Void
+    let retry: () -> Void // what "Try again" does (passed in by RootView: reload the page)
 
     var body: some View {
         VStack(spacing: 12) {
@@ -106,6 +126,7 @@ struct WatchlistView: View {
 
     var body: some View {
         List {
+            // First section: the explanation and "Check now". Second: the companies (or the empty message).
             Section {
                 Text("watchlist_intro")
                     .font(.subheadline)
@@ -119,6 +140,7 @@ struct WatchlistView: View {
                 if model.watchlist.isEmpty {
                     Text("watchlist_empty").accessibilityIdentifier("watchlist-empty")
                 }
+                // One row per company; `id: \.ticker` tells SwiftUI which row is which when the list changes.
                 ForEach(model.watchlist, id: \.ticker) { w in
                     HStack {
                         Button { model.open(SiteURLs.results(siteURL: model.siteURL, ticker: w.ticker)) } label: {

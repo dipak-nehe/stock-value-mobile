@@ -1,6 +1,10 @@
 import Foundation
 
 /// Shared app state: the page on screen, pages to open (from notifications or the Watchlist), and the watchlist.
+///
+/// Swift notes: `@MainActor` means everything here runs on the main (UI) thread. `ObservableObject` + `@Published`
+/// make SwiftUI redraw any view using a property when it changes. `static let shared` is the one instance the whole
+/// app uses (the notification handler in AppDelegate needs to reach it too).
 @MainActor
 final class AppModel: ObservableObject {
     static let shared = AppModel()
@@ -16,6 +20,8 @@ final class AppModel: ObservableObject {
 
     init() {
         refreshWatchlist()
+        // A finished background check posts .watchlistChanged: reload the list so the screens update.
+        // `[weak self]` avoids keeping this object alive just because the observer exists.
         NotificationCenter.default.addObserver(forName: .watchlistChanged, object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in self?.refreshWatchlist() }
         }
@@ -59,6 +65,7 @@ final class AppModel: ObservableObject {
         refreshWatchlist()
     }
 
+    /// "Check now": run a check in the background right away (not on the UI thread).
     func checkNow() {
         let site = siteURL
         Task.detached { await FilingChecks.run(siteURL: site) }

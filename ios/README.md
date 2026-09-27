@@ -36,6 +36,8 @@ GitHub Actions (`.github/workflows/ios.yml`) generates the project, picks an ava
 
 ## Project structure
 
+For how the parts fit together (diagrams, flows, security, CI), see [docs/architecture.md](docs/architecture.md).
+
 ```
 project.yml                  XcodeGen project (targets, Info.plist, background task id, local-network exception)
 StockValue/

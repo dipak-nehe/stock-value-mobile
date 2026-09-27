@@ -16,6 +16,7 @@ struct SitePolicy {
     }
 
     func target(for url: String) -> Target {
+        // `guard let … else { return .block }`: if the address can't be read or has no scheme, block it.
         guard let link = URLComponents(string: url), let scheme = link.scheme?.lowercased() else { return .block }
         if isSameSite(link, scheme: scheme) { return .app }
         return outsideSchemes.contains(scheme) ? .browser : .block

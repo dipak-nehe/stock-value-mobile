@@ -3,6 +3,9 @@ import Foundation
 /// The watchlist, kept on the phone only (UserDefaults, as JSON). It never leaves the device.
 ///
 /// TO CHANGE HOW MANY COMPANIES CAN BE WATCHED: edit `max`.
+///
+/// Swift notes: `lock.lock(); defer { lock.unlock() }` lets one change happen at a time (the screen and a background
+/// check can both change the list) and always unlocks when the function ends.
 final class WatchStore {
     static let max = 25
     private let defaults: UserDefaults

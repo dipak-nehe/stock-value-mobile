@@ -1,4 +1,11 @@
 # XcodeGen project definition: `xcodegen generate` writes StockValue.xcodeproj (not committed).
+#
+# WHERE TO CHANGE THINGS:
+#  - the website: SiteURL (under targets > StockValue > info > properties)
+#  - the version for a release: MARKETING_VERSION (what people see, e.g. 1.1) and CURRENT_PROJECT_VERSION (a build
+#    number that must go up for each TestFlight/App Store upload)
+#  - the app's id: PRODUCT_BUNDLE_IDENTIFIER (changing it makes it a different app)
+#  - the minimum iOS version: deploymentTarget
 name: StockValue
 options:
   bundleIdPrefix: com.dipaknehe

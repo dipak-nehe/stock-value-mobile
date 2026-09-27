@@ -4,6 +4,9 @@ import WebKit
 
 /// Owns the WKWebView: loading, link routing (SitePolicy), new-tab links, pull to refresh, the offline state,
 /// renderer crashes and Back. Same behaviour as the Android app's MainActivity.
+///
+/// Swift notes: it subclasses NSObject because WebKit's delegate protocols come from Objective-C. The
+/// `extension WebController: WKNavigationDelegate, WKUIDelegate` below adds the callbacks WebKit calls.
 @MainActor
 final class WebController: NSObject, ObservableObject {
     let webView: WKWebView
@@ -36,6 +39,8 @@ final class WebController: NSObject, ObservableObject {
         refresh.addTarget(self, action: #selector(pulledToRefresh(_:)), for: .valueChanged)
         webView.scrollView.refreshControl = refresh
 
+        // Key-value observation: WebKit tells us when these properties change, and we copy them into @Published
+        // properties so SwiftUI redraws (loading bar, Back button, Watch star).
         observations = [
             webView.observe(\.estimatedProgress, options: .new) { [weak self] view, _ in
                 Task { @MainActor in self?.progress = view.estimatedProgress }

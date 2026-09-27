@@ -2,6 +2,10 @@ import Foundation
 
 // The data the filing alerts work with, and the rules that decide what's new. Same rules as the Android app's
 // Filings.kt, and unit-tested the same way (AlertRulesTests).
+//
+// Swift notes: a `struct` is a value type (copied when assigned). `Codable` lets JSONEncoder/JSONDecoder save and
+// load it; `Equatable` lets tests compare values with ==. `let` fields can't change, `var` fields can.
+// `String?` means "a String or nil"; `x ?? y` means "x, or y if x is nil".
 
 /// The newest annual or quarterly report (10-K, 10-Q, 20-F, 40-F or an amendment), from the API's `latestReport`.
 struct Report: Codable, Equatable {
