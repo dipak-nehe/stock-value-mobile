@@ -23,6 +23,10 @@ export const config: WebdriverIO.Config = {
     logLevel: 'warn',
     outputDir: './logs',
     bail: 0,
+    // CI emulators are sometimes overloaded right after boot (Google Play services busy): re-run a failed spec file
+    // once in a fresh session. A real failure fails twice and still fails the job; the retry shows in Allure.
+    specFileRetries: process.env.CI ? 1 : 0,
+    specFileRetriesDeferred: false,
     waitforTimeout: 20_000,
     connectionRetryTimeout: 180_000,
     connectionRetryCount: 2,
