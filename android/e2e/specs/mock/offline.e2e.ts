@@ -2,6 +2,7 @@ import { expect } from '@wdio/globals';
 import MainScreen from '../../screens/MainScreen.js';
 import { MockSite } from '../../support/mockSite.js';
 import { inWebView, launchApp, removeReverse, resetApp, reversePort } from '../../support/app.js';
+import { screenshot } from '../../support/report.js';
 
 describe('Offline screen', () => {
     const site = new MockSite(8765);
@@ -23,6 +24,7 @@ describe('Offline screen', () => {
         await expect(MainScreen.offlineTitle).toBeDisplayed({ wait: 30_000 });
         await expect(MainScreen.offlineTitle).toHaveText("Can't reach the site");
         await expect(MainScreen.retryButton).toBeDisplayed();
+        await screenshot('offline screen');
     });
 
     it('loads the page after "Try again" once the site is reachable', async () => {

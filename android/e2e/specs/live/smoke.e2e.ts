@@ -1,6 +1,9 @@
 import { expect } from '@wdio/globals';
 import MainScreen from '../../screens/MainScreen.js';
 import { inWebView, launchApp, resetApp } from '../../support/app.js';
+import { screenshot } from '../../support/report.js';
+
+const LIVE = 'https://stock-value-analysis.vercel.app/';
 
 /** Against the real site: proves the app works with the live web app and SEC data, not only with the mock. */
 describe('Live site smoke test', () => {
@@ -19,9 +22,20 @@ describe('Live site smoke test', () => {
             await expect($('#coName')).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
             await expect($('#glance')).toBeDisplayed();
         });
+        await screenshot('live results for KO');
     });
 
     it('offers the Watch star for that company', async () => {
         await expect(MainScreen.watchButton('KO')).toBeDisplayed({ wait: 20_000 });
+    });
+
+    it('shows the web app in Spanish inside the app', async () => {
+        await launchApp({ open: `${LIVE}?t=KO&lang=es` });
+        await inWebView(async () => {
+            await expect($('#go')).toHaveText('Analizar', { wait: 60_000 });
+            await expect($('#coName')).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
+            await expect($('#tab-flags')).toHaveText(expect.stringContaining('Señales'));
+        });
+        await screenshot('live results in Spanish');
     });
 });

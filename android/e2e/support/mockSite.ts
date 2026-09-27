@@ -4,8 +4,8 @@ export interface Report { form: string; date: string; accession: string; url: st
 export interface FilingEvent { date: string; type: string; form: string; url: string }
 
 const page = (body: string) =>
-    `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mock</title></head>` +
-    `<body style="font:18px sans-serif;padding:16px">${body}</body></html>`;
+    `<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width, initial-scale=1">` +
+    `<title>Mock web app</title></head><body style="font:18px sans-serif;padding:16px"><main>${body}</main></body></html>`;
 
 /**
  * A tiny stand-in for the web app: a start page, a second page, a results page and the /api/financials endpoint

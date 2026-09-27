@@ -22,17 +22,9 @@ class WatchlistScreen {
         return $(`~Stop watching ${ticker}`);
     }
 
-    /** The screen re-reads the list when it comes back to the front; reopen to see a background update. */
+    /** The screen refreshes itself when a check finishes, so just wait for the text. */
     async waitForDetail(text: string, timeout = 60_000): Promise<void> {
-        await browser.waitUntil(
-            async () => {
-                if (await this.detail(text).isDisplayed()) return true;
-                await driver.back();
-                await $('~Watchlist').click();
-                return false;
-            },
-            { timeout, interval: 3_000, timeoutMsg: `Watchlist never showed "${text}"` },
-        );
+        await this.detail(text).waitForDisplayed({ timeout, timeoutMsg: `Watchlist never showed "${text}"` });
     }
 }
 

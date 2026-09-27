@@ -35,5 +35,8 @@ export const androidCapabilities = {
     // Hybrid testing: download the chromedriver that matches the device's WebView when switching to WEBVIEW.
     'appium:chromedriverAutodownload': true,
     'appium:ensureWebviewsHavePages': true,
+    // A fresh chromedriver session on every switch into the WebView (the app's pages change between switches).
+    'appium:recreateChromeDriverSessions': true,
+    'appium:showChromedriverLog': true,
     'appium:nativeWebScreenshot': true,
 } as WebdriverIO.Capabilities;

@@ -121,7 +121,8 @@ jobs:
           target: google_apis
           disable-animations: true
           disk-size: 4096M
-          script: cd e2e && npm test
+          # On failure, keep the device log (the app logs each page it loads in debug builds).
+          script: cd e2e && npm test || { adb logcat -d > logs/logcat.txt; exit 1; }
 
       - name: Build the Allure report
         if: always()

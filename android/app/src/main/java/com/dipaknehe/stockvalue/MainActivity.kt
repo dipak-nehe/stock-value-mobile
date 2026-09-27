@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Message
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.RenderProcessGoneDetail
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
         /** Debug builds only: load this address instead of the live site (used by the instrumented tests). */
         const val EXTRA_SITE_URL = "com.dipaknehe.stockvalue.SITE_URL"
         const val USER_AGENT_TAG = "StockValueAndroid"
+        private const val TAG = "StockValue"
 
         /** A page of the web app to open, e.g. from a filing-alert notification or the Watchlist screen. */
         const val EXTRA_OPEN_URL = "com.dipaknehe.stockvalue.OPEN_URL"
@@ -108,9 +110,11 @@ class MainActivity : ComponentActivity() {
         // A requested page (notification, Watchlist) wins over the page restored from before.
         val requested = pageFrom(intent)
         if (requested != null) {
-            webView.loadUrl(requested)
+            load(requested, "requested at start")
         } else if (savedInstanceState == null || webView.restoreState(savedInstanceState) == null) {
-            webView.loadUrl(siteUrl)
+            load(siteUrl, "start page")
+        } else {
+            debug("restored ${webView.url}")
         }
     }
 
@@ -121,7 +125,7 @@ class MainActivity : ComponentActivity() {
         pageFrom(intent)?.let {
             mainFrameFailed = false
             back.isEnabled = true
-            webView.loadUrl(it)
+            load(it, "requested while open")
         }
     }
 
@@ -284,7 +288,7 @@ class MainActivity : ComponentActivity() {
         when (policy.targetFor(uri.toString())) {
             SitePolicy.Target.APP -> {
                 back.isEnabled = true
-                webView.loadUrl(uri.toString())
+                load(uri.toString(), "new-tab link")
             }
             SitePolicy.Target.BROWSER -> openElsewhere(uri)
             SitePolicy.Target.BLOCK -> Unit
@@ -294,7 +298,17 @@ class MainActivity : ComponentActivity() {
     private fun reload() {
         mainFrameFailed = false
         val current = webView.url
-        if (current.isNullOrEmpty() || current == "about:blank") webView.loadUrl(siteUrl) else webView.reload()
+        if (current.isNullOrEmpty() || current == "about:blank") load(siteUrl, "retry with no page") else webView.reload()
+    }
+
+    private fun load(url: String, why: String) {
+        debug("load $url ($why)")
+        webView.loadUrl(url)
+    }
+
+    /** Debug builds only: a trace of page loads, used when diagnosing the end-to-end tests. */
+    private fun debug(message: String) {
+        if (BuildConfig.DEBUG) Log.d(TAG, message)
     }
 
     private fun showPage() {

@@ -4,6 +4,7 @@ import Notifications from '../../screens/Notifications.js';
 import WatchlistScreen from '../../screens/WatchlistScreen.js';
 import { MockSite, type Report } from '../../support/mockSite.js';
 import { inWebView, launchApp, removeReverse, resetApp, reversePort } from '../../support/app.js';
+import { screenshot } from '../../support/report.js';
 
 const Q2: Report = { form: '10-Q', date: '2026-04-28', accession: '0000021344-26-000010', url: 'https://www.sec.gov/q2.htm' };
 const Q3: Report = { form: '10-Q', date: '2026-07-29', accession: '0000021344-26-000020', url: 'https://www.sec.gov/q3.htm' };
@@ -38,6 +39,7 @@ describe('Filing alerts', () => {
         await MainScreen.openWatchlist();
         await expect(WatchlistScreen.row('COCA COLA CO (KO)')).toBeDisplayed({ wait: 60_000 });
         await WatchlistScreen.waitForDetail('Latest report: 10-Q filed 2026-04-28');
+        await screenshot('Watchlist after watching KO');
 
         await Notifications.open();
         await expect(Notifications.notification('COCA COLA CO')).not.toBeExisting();
@@ -55,6 +57,7 @@ describe('Filing alerts', () => {
 
         await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
         await expect(Notifications.notification('late-filing notice (NT 10-K)')).toBeDisplayed();
+        await screenshot('notification shade with the two alerts');
         // exactly two: the report and the late filing; the SEC letter isn't announced
         await expect($$('android=new UiSelector().textContains("COCA COLA CO (KO)")')).toBeElementsArrayOfSize(2);
         await Notifications.close();

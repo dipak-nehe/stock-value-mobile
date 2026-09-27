@@ -58,7 +58,8 @@ const contextName = (c: unknown): string => (typeof c === 'string' ? c : String(
  */
 export async function inWebView<T>(fn: () => Promise<T>): Promise<T> {
     const ours = `WEBVIEW_${APP_ID}`;
-    let lastError = '';
+    let lastError = 'no attempt finished';
+    // Starting chromedriver against an older WebView can take a minute on CI, so allow a few attempts.
     await browser.waitUntil(
         async () => {
             const contexts = (await driver.getContexts()).map(contextName);
@@ -74,13 +75,23 @@ export async function inWebView<T>(fn: () => Promise<T>): Promise<T> {
                 return false;
             }
         },
-        { timeout: 45_000, interval: 1_000, timeoutMsg: `could not switch to the app's WebView (${lastError})` },
-    );
+        { timeout: 150_000, interval: 2_000 },
+    ).catch(() => {
+        throw new Error(`could not switch to the app's WebView: ${lastError}`);
+    });
     try {
         return await fn();
     } finally {
         await driver.switchContext('NATIVE_APP');
     }
+}
+
+/**
+ * Sets the app's own language (Android 13+ per-app language; the app declares en and es in its localeConfig).
+ * Pass null to follow the phone's language again. Takes effect the next time the screen is created.
+ */
+export function setAppLanguage(locale: string | null): void {
+    adb('shell', 'cmd', 'locale', 'set-app-locales', APP_ID, '--locales', locale ?? "''");
 }
 
 /** A UiAutomator selector for a view id in the app, e.g. byId('retry'). */
