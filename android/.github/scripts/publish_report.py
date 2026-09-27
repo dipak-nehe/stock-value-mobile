@@ -6,8 +6,8 @@ Prints the report URL on success and writes it to $GITHUB_OUTPUT as `url`. The t
 
 Usage: python3 .github/scripts/publish_report.py e2e/allure-report/index.html
 
-Outputs `url` (stable address: always the latest report) and `run_url` (this run's own report, kept).
-The report project is made public (no Vercel login) so the links in emails open for the recipient.
+Outputs `url` (stable address: always the latest report) and `run_url` (this run's own report, kept), and links
+both on the GitHub run's summary page. The report project is made public (no Vercel login) so the links open anywhere.
 """
 import hashlib
 import json
@@ -104,6 +104,9 @@ def main(path):
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
             fh.write(f"url={url}\nrun_url={run_url}\n")
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+            fh.write(f"**Allure report:** [this run]({run_url}) · [latest]({url})\n")
 
 
 if __name__ == "__main__":

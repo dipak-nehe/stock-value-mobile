@@ -3,6 +3,7 @@ name: android
 on:
   push:
   pull_request:
+  workflow_dispatch:   # "Run workflow" button, e.g. to publish the report right after adding VERCEL_TOKEN
 
 jobs:
   build:
@@ -145,10 +146,15 @@ jobs:
         if: always()
         run: python3 .github/scripts/allure_counts.py e2e/allure-results
 
+      # Latest report: https://stock-value-android-test-report.vercel.app (main only; needs the VERCEL_TOKEN secret).
       - name: Publish the Allure report to Vercel
         id: publish
-        if: always() && env.VERCEL_TOKEN != '' && hashFiles('e2e/allure-report/index.html') != ''
+        if: always() && github.ref == 'refs/heads/main' && env.VERCEL_TOKEN != '' && hashFiles('e2e/allure-report/index.html') != ''
         run: python3 .github/scripts/publish_report.py e2e/allure-report/index.html
+
+      - name: Explain a skipped report upload
+        if: always() && github.ref == 'refs/heads/main' && env.VERCEL_TOKEN == ''
+        run: echo "::notice title=Allure report not published::Add the VERCEL_TOKEN secret to publish the report to stock-value-android-test-report.vercel.app. It's still downloadable as the appium-allure-report artifact."
 
       - name: Upload the Allure report
         if: always()
