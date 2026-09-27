@@ -132,7 +132,15 @@ class WatchTest {
             assertEquals(Q2, store.all().single().report)
             assertEquals(emptyList<String>(), postedTexts())
 
-            onView(withId(R.id.action_watchlist)).perform(click())
+            // The toolbar was just re-laid out (☆ → ★); retry the tap until the Watchlist screen is open.
+            eventually {
+                try {
+                    onView(withId(R.id.checkNow)).check(matches(isDisplayed()))
+                } catch (e: Throwable) {
+                    onView(withId(R.id.action_watchlist)).perform(click())
+                    throw e
+                }
+            }
             eventually { onView(withText("COCA COLA CO (KO)")).check(matches(isDisplayed())) }
             onView(withText(containsString("Latest report: 10-Q filed 2026-04-28"))).check(matches(isDisplayed()))
 
