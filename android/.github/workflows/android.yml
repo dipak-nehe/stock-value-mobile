@@ -76,6 +76,16 @@ jobs:
     name: Appium end-to-end (WebdriverIO)
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    outputs:
+      passed: ${{ steps.counts.outputs.passed }}
+      failed: ${{ steps.counts.outputs.failed }}
+      broken: ${{ steps.counts.outputs.broken }}
+      total: ${{ steps.counts.outputs.total }}
+      report_url: ${{ steps.publish.outputs.run_url }}
+      latest_report_url: ${{ steps.publish.outputs.url }}
+    env:
+      # Optional: publishes the Allure report to its own Vercel site (the email links to it).
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       # The emulator needs ~7.4 GB for its data partition; with Gradle and node_modules the runner falls just short.
       # Remove preinstalled toolchains this job never uses (.NET, Haskell, CodeQL, Boost).
@@ -133,6 +143,16 @@ jobs:
         working-directory: e2e
         run: npm run report
 
+      - name: Count the results
+        id: counts
+        if: always()
+        run: python3 .github/scripts/allure_counts.py e2e/allure-results
+
+      - name: Publish the Allure report to Vercel
+        id: publish
+        if: always() && env.VERCEL_TOKEN != '' && hashFiles('e2e/allure-report/index.html') != ''
+        run: python3 .github/scripts/publish_report.py e2e/allure-report/index.html
+
       - name: Upload the Allure report
         if: always()
         uses: actions/upload-artifact@v7
@@ -148,3 +168,51 @@ jobs:
           name: appium-logs
           path: e2e/logs/
           if-no-files-found: ignore
+
+  # Emails a summary with a link to the Allure report: on every push to main, and on any failed run.
+  # Needs secrets SMTP_USERNAME / SMTP_PASSWORD (a Gmail address and an app password) and the REPORT_EMAIL variable;
+  # without them the step is skipped with a note.
+  notify:
+    name: Email the test report
+    needs: [build, emulator, appium]
+    if: always() && (github.ref == 'refs/heads/main' || contains(needs.*.result, 'failure'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      REPORT_EMAIL: ${{ vars.REPORT_EMAIL }}
+      OUTCOME: ${{ contains(needs.*.result, 'failure') && 'FAILED' || contains(needs.*.result, 'cancelled') && 'CANCELLED' || 'PASSED' }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Explain a skipped email
+        if: env.SMTP_USERNAME == '' || env.SMTP_PASSWORD == '' || env.REPORT_EMAIL == ''
+        run: echo "::notice title=Report email skipped::Set the SMTP_USERNAME and SMTP_PASSWORD secrets and the REPORT_EMAIL variable to receive report emails."
+
+      - name: Send the email
+        if: env.SMTP_USERNAME != '' && env.SMTP_PASSWORD != '' && env.REPORT_EMAIL != ''
+        uses: dawidd6/action-send-mail@v22
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: Stock Value Android CI <${{ secrets.SMTP_USERNAME }}>
+          to: ${{ vars.REPORT_EMAIL }}
+          subject: "[${{ env.OUTCOME }}] Stock Value Android tests: ${{ needs.appium.outputs.passed || '?' }}/${{ needs.appium.outputs.total || '?' }} e2e passed (${{ github.ref_name }} ${{ github.sha }})"
+          html_body: |
+            <h2 style="margin:0 0 8px">Stock Value Android: ${{ env.OUTCOME }}</h2>
+            <p style="margin:0 0 12px;color:#555">${{ github.event.head_commit.message || github.event.pull_request.title }}<br>
+              <code>${{ github.ref_name }}</code> · <code>${{ github.sha }}</code> · by ${{ github.actor }}</p>
+            <table cellpadding="6" style="border-collapse:collapse;border:1px solid #ddd">
+              <tr><td>Unit tests, lint, APK</td><td><b>${{ needs.build.result }}</b></td></tr>
+              <tr><td>Espresso emulator tests</td><td><b>${{ needs.emulator.result }}</b></td></tr>
+              <tr><td>Appium end-to-end</td><td><b>${{ needs.appium.result }}</b>:
+                ${{ needs.appium.outputs.passed || 0 }} passed, ${{ needs.appium.outputs.failed || 0 }} failed,
+                ${{ needs.appium.outputs.broken || 0 }} broken, of ${{ needs.appium.outputs.total || 0 }}</td></tr>
+            </table>
+            <p style="margin:16px 0 4px"><a href="${{ needs.appium.outputs.report_url || env.RUN_URL }}"
+              style="background:#2166b8;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none">Open the Allure report</a></p>
+            <p style="margin:12px 0 0;color:#555">GitHub run (logs, APK and report downloads): <a href="${{ env.RUN_URL }}">${{ env.RUN_URL }}</a>
+              ${{ needs.appium.outputs.latest_report_url && format('<br>Latest report, always: <a href="{0}">{0}</a>', needs.appium.outputs.latest_report_url) || '' }}</p>

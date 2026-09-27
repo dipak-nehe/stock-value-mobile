@@ -92,6 +92,20 @@ npm run report && npm run report:open
 
 Useful variables: `ANDROID_SERIAL` (pick a device), `APK_PATH` (another APK), `ANDROID_HOME` (where `adb` is).
 
+## Test report email
+
+After each push to `main`, and after any failed run, the last CI job emails a summary to the address in the `REPORT_EMAIL` repository variable (Settings → Secrets and variables → Actions → Variables). The email shows the result of each job, the end-to-end pass/fail counts (a retried test counts once, by its last attempt), a button to that run's **Allure report** on its own Vercel site, and a link to the GitHub run.
+
+One-time setup (the values never appear in the code or the logs):
+
+```bash
+gh secret set SMTP_USERNAME -R dipak-nehe/stock-value-android   # the Gmail address that sends the email
+gh secret set SMTP_PASSWORD -R dipak-nehe/stock-value-android   # a Gmail app password (Google Account → Security → App passwords)
+gh secret set VERCEL_TOKEN  -R dipak-nehe/stock-value-android   # vercel.com/account/settings/tokens, whole account or team
+```
+
+Without the SMTP secrets the email is skipped with a note; without `VERCEL_TOKEN` the report isn't published and the button links to the GitHub run (the report is still downloadable there). The report site (`stock-value-android-test-report`) is public so the link opens on any device; it contains screenshots of the app and test pages only.
+
 ## Project structure
 
 ```
@@ -109,6 +123,7 @@ app/src/debug/res/xml/   debug-only network security config for the tests' local
 app/src/test/            JVM unit tests
 app/src/androidTest/     emulator tests
 gradle/libs.versions.toml  dependency versions
+.github/scripts/         Allure result counts and report publishing (Vercel) for the email
 e2e/                     WebdriverIO + Appium end-to-end tests (TypeScript) and Allure report
 ```
 
