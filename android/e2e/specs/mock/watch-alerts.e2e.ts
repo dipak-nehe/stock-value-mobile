@@ -50,6 +50,7 @@ describe('Filing alerts', () => {
             { date: '2026-08-15', type: 'late_filing', form: 'NT 10-K', url: 'https://www.sec.gov/nt.htm' },
             { date: '2026-08-01', type: 'sec_letter', form: 'UPLOAD', url: 'https://www.sec.gov/letter.pdf' },
         ];
+        if (!(await WatchlistScreen.checkNowButton.isDisplayed())) await MainScreen.openWatchlist();
         await WatchlistScreen.checkNowButton.click();
 
         await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');

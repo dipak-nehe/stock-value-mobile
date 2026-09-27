@@ -51,17 +51,31 @@ export async function launchApp(options: { site?: string; open?: string } = {}):
 
 const contextName = (c: unknown): string => (typeof c === 'string' ? c : String((c as { id?: string }).id ?? ''));
 
-/** Runs `fn` inside the app's WebView (the web page), then returns to the native screen. */
+/**
+ * Runs `fn` inside the app's WebView (the web page), then returns to the native screen.
+ * Other apps on the device (e.g. Google system apps) have WebViews too, so pick this app's by name; a context can
+ * also vanish between listing and switching while the page loads, so retry the switch.
+ */
 export async function inWebView<T>(fn: () => Promise<T>): Promise<T> {
-    let webview = '';
+    const ours = `WEBVIEW_${APP_ID}`;
+    let lastError = '';
     await browser.waitUntil(
         async () => {
-            webview = (await driver.getContexts()).map(contextName).find((c) => c.startsWith('WEBVIEW')) ?? '';
-            return webview !== '';
+            const contexts = (await driver.getContexts()).map(contextName);
+            if (!contexts.includes(ours)) {
+                lastError = `contexts: ${contexts.join(', ')}`;
+                return false;
+            }
+            try {
+                await driver.switchContext(ours);
+                return true;
+            } catch (e) {
+                lastError = String(e);
+                return false;
+            }
         },
-        { timeout: 30_000, timeoutMsg: 'the app WebView never became inspectable' },
+        { timeout: 45_000, interval: 1_000, timeoutMsg: `could not switch to the app's WebView (${lastError})` },
     );
-    await driver.switchContext(webview);
     try {
         return await fn();
     } finally {

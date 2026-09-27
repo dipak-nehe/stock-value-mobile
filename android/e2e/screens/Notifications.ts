@@ -1,4 +1,4 @@
-import { byTextContains } from '../support/app.js';
+import { adb, byTextContains } from '../support/app.js';
 
 /** The system notification shade. */
 class Notifications {
@@ -6,8 +6,10 @@ class Notifications {
         await driver.openNotifications();
     }
 
+    /** Collapses the shade without pressing Back (Back would leave the app screen if the shade had already closed). */
     async close(): Promise<void> {
-        await driver.back();
+        adb('shell', 'cmd', 'statusbar', 'collapse');
+        await browser.pause(500);
     }
 
     notification(text: string) {
