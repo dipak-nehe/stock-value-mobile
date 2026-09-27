@@ -1,0 +1,27 @@
+/* English texts for the app's own screens and notifications (the web page translates itself). Same keys as the Android strings.xml. */
+"app_name" = "Stock Value";
+"offline_title" = "Can't reach the site";
+"offline_message" = "Check your internet connection and try again.";
+"retry" = "Try again";
+"back" = "Back";
+"watchlist" = "Watchlist";
+"check_now" = "Check now";
+"watchlist_intro" = "You'll get a notification when a company files a new annual or quarterly report, or a serious warning: a restatement warning, an auditor change, a late-filing notice or an amended annual report. iOS decides when to check in the background; your list stays on this phone.";
+"watchlist_empty" = "No companies yet. Open a company's analysis and tap the star to watch it.";
+"action_watch" = "Watch %@ for new filings";
+"action_watching" = "Watching %@ (tap to stop)";
+"watched" = "Watching %@. You'll get a notification when it files a new report or a serious warning.";
+"unwatched" = "Stopped watching %@";
+"watchlist_full" = "The watchlist is full. Remove a company first (limit: %d).";
+"latest_report" = "Latest report: %1$@ filed %2$@";
+"no_report" = "No annual or quarterly report found";
+"waiting_first_check" = "Waiting for the first check";
+"last_checked" = "Checked %@";
+"remove_ticker" = "Stop watching %@";
+"alert_title" = "%1$@ (%2$@)";
+"alert_title_warning" = "⚠ %1$@ (%2$@)";
+"alert_new_report" = "Filed a new %1$@ on %2$@. Tap to see the updated analysis.";
+"alert_late_filing" = "Filed a late-filing notice (%@): it couldn't file a report on time.";
+"alert_non_reliance" = "Warned that earlier financial statements can't be relied on (a restatement).";
+"alert_auditor_change" = "Changed its independent auditor.";
+"alert_amendment" = "Amended its annual report (%@).";

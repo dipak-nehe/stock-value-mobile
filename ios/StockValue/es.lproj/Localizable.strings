@@ -1,0 +1,27 @@
+/* Spanish texts for the app's own screens and notifications (the web page translates itself). Same keys as the Android strings.xml. */
+"app_name" = "Stock Value";
+"offline_title" = "No se puede acceder al sitio";
+"offline_message" = "Comprueba tu conexión a internet y vuelve a intentarlo.";
+"retry" = "Reintentar";
+"back" = "Atrás";
+"watchlist" = "Seguimiento";
+"check_now" = "Comprobar ahora";
+"watchlist_intro" = "Recibirás una notificación cuando una empresa presente un nuevo informe anual o trimestral, o un aviso grave: un aviso de reexpresión, un cambio de auditor, un aviso de presentación tardía o un informe anual modificado. iOS decide cuándo comprobar en segundo plano; tu lista se queda en este teléfono.";
+"watchlist_empty" = "Aún no sigues ninguna empresa. Abre el análisis de una empresa y toca la estrella para seguirla.";
+"action_watch" = "Seguir las presentaciones de %@";
+"action_watching" = "Siguiendo %@ (toca para dejar de seguir)";
+"watched" = "Siguiendo %@. Recibirás una notificación cuando presente un nuevo informe o un aviso grave.";
+"unwatched" = "Has dejado de seguir %@";
+"watchlist_full" = "La lista está llena. Quita una empresa primero (límite: %d).";
+"latest_report" = "Último informe: %1$@ presentado el %2$@";
+"no_report" = "No se ha encontrado ningún informe anual o trimestral";
+"waiting_first_check" = "Pendiente de la primera comprobación";
+"last_checked" = "Comprobado %@";
+"remove_ticker" = "Dejar de seguir %@";
+"alert_title" = "%1$@ (%2$@)";
+"alert_title_warning" = "⚠ %1$@ (%2$@)";
+"alert_new_report" = "Ha presentado un nuevo %1$@ el %2$@. Toca para ver el análisis actualizado.";
+"alert_late_filing" = "Ha presentado un aviso de presentación tardía (%@): no pudo presentar un informe a tiempo.";
+"alert_non_reliance" = "Ha advertido de que no se puede confiar en estados financieros anteriores (una reexpresión).";
+"alert_auditor_change" = "Ha cambiado de auditor independiente.";
+"alert_amendment" = "Ha modificado su informe anual (%@).";
