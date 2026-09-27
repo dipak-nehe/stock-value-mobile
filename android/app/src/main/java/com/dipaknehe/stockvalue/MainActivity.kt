@@ -24,6 +24,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.net.toUri
 import androidx.core.view.updatePadding
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
@@ -45,7 +46,8 @@ class MainActivity : ComponentActivity() {
     private var mainFrameFailed = false
     private var rendererGone = false
 
-    // Enabled only while the page has history, so at the first page the system's predictive "back to home" works.
+    // Enabled once there is (or is about to be) page history; disabled on a fully loaded first page, so the
+    // system's predictive "back to home" animation works there. When pressed it checks the live history.
     private val back = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
             if (webView.canGoBack()) {
@@ -111,7 +113,9 @@ class MainActivity : ComponentActivity() {
             }
 
             // A new-tab link (target=_blank). Hand the page a throwaway WebView, read the address it tries to load,
-            // and route that address like any other link.
+            // and route that address like any other link. The throwaway WebView's client handles onRenderProcessGone;
+            // the androidx.webkit lint check doesn't detect Kotlin overrides (false positive).
+            @SuppressLint("MissingOnRenderProcessGone")
             override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
                 val popup = WebView(view.context)
                 popup.webViewClient = object : WebViewClient() {
@@ -130,7 +134,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     override fun onPageStarted(v: WebView, url: String?, favicon: Bitmap?) {
-                        if (!url.isNullOrEmpty() && url != "about:blank") take(Uri.parse(url))
+                        if (!url.isNullOrEmpty() && url != "about:blank") take(url.toUri())
                     }
 
                     override fun onRenderProcessGone(v: WebView, detail: RenderProcessGoneDetail): Boolean {
@@ -150,7 +154,10 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MissingOnRenderProcessGone")
     private inner class PageClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            if (policy.targetFor(request.url.toString()) == SitePolicy.Target.APP) return false
+            if (policy.targetFor(request.url.toString()) == SitePolicy.Target.APP) {
+                back.isEnabled = true  // this navigation adds history; Back may be pressed before it finishes loading
+                return false
+            }
             route(request.url)
             return true
         }
@@ -162,7 +169,7 @@ class MainActivity : ComponentActivity() {
         override fun onPageFinished(view: WebView, url: String?) {
             progress.visibility = View.GONE
             refresh.isRefreshing = false
-            back.isEnabled = view.canGoBack()  // history is settled by now (doUpdateVisitedHistory can come too early)
+            back.isEnabled = view.canGoBack()  // history is settled once the page has loaded
             if (!mainFrameFailed) showPage()
         }
 
@@ -181,7 +188,7 @@ class MainActivity : ComponentActivity() {
         }
 
         override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
-            back.isEnabled = view.canGoBack()
+            if (view.canGoBack()) back.isEnabled = true  // only ever enable here: this can run before history updates
         }
     
     }
@@ -189,7 +196,10 @@ class MainActivity : ComponentActivity() {
     /** Open a link according to [SitePolicy]: in this WebView, in another app, or not at all. */
     private fun route(uri: Uri) {
         when (policy.targetFor(uri.toString())) {
-            SitePolicy.Target.APP -> webView.loadUrl(uri.toString())
+            SitePolicy.Target.APP -> {
+                back.isEnabled = true
+                webView.loadUrl(uri.toString())
+            }
             SitePolicy.Target.BROWSER -> openElsewhere(uri)
             SitePolicy.Target.BLOCK -> Unit
         }
