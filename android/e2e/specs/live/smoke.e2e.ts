@@ -1,5 +1,6 @@
 import { expect } from '@wdio/globals';
 import MainScreen from '../../screens/MainScreen.js';
+import WebAnalysis, { WebAnalysisPage } from '../../webpages/WebAnalysisPage.js';
 import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
@@ -15,12 +16,11 @@ describe('Live site smoke test', () => {
     it('loads the live web app and analyses a company from real SEC data', async () => {
         // One switch into the page for the whole web flow.
         await inWebView(async () => {
-            await expect($('h1')).toHaveText(expect.stringContaining('10-Year Stock Value Analysis'), { wait: 60_000 });
-            await expect($('#go')).toBeEnabled({ wait: 30_000 }); // the page's script has loaded
-            await $('#ticker').setValue('KO');
-            await $('#go').click();
-            await expect($('#coName')).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
-            await expect($('#glance')).toBeDisplayed();
+            await expect(WebAnalysis.siteTitle).toHaveText(expect.stringContaining('10-Year Stock Value Analysis'), { wait: 60_000 });
+            await expect(WebAnalysis.analyzeButton).toBeEnabled({ wait: 30_000 }); // the page's script has loaded
+            await WebAnalysis.search('KO');
+            await expect(WebAnalysis.companyName).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
+            await expect(WebAnalysis.glance).toBeDisplayed();
         });
         await screenshot('live results for KO');
     });
@@ -31,10 +31,11 @@ describe('Live site smoke test', () => {
 
     it('shows the web app in Spanish inside the app', async () => {
         await launchApp({ open: `${LIVE}?t=KO&lang=es` });
+        const spanish = new WebAnalysisPage('es');
         await inWebView(async () => {
-            await expect($('#go')).toHaveText('Analizar', { wait: 60_000 });
-            await expect($('#coName')).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
-            await expect($('#tab-flags')).toHaveText(expect.stringContaining('Señales'));
+            await expect(spanish.analyzeButton).toHaveText('Analizar', { wait: 60_000 });
+            await expect(spanish.companyName).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
+            await expect(spanish.tab('flags')).toHaveText(expect.stringContaining('Señales'));
         }, { retries: 1 });
         await screenshot('live results in Spanish');
     });

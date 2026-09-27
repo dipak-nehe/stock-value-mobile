@@ -12,8 +12,14 @@ class Notifications {
         await browser.pause(500);
     }
 
+    /** The first notification text containing `text`. */
     notification(text: string) {
         return $(byTextContains(text));
+    }
+
+    /** Every notification text containing `text` (e.g. to count one company's alerts). */
+    notifications(text: string) {
+        return $$(byTextContains(text));
     }
 
     /** Opens the shade and waits for a notification containing `text`. */

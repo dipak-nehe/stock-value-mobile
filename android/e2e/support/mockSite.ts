@@ -41,10 +41,10 @@ export class MockSite {
                 }));
             }
             if (url.startsWith('/api/')) return send(404, 'application/json', '{"error":"Not found"}');
-            if (url.startsWith('/next')) return send(200, 'text/html', page('<h1 id="title">Next</h1>'));
-            if (url.startsWith('/?t=')) return send(200, 'text/html', page('<h1 id="title">KO results</h1>'));
+            if (url.startsWith('/next')) return send(200, 'text/html', page('<h1 id="title" data-testid="title">Next</h1>'));
+            if (url.startsWith('/?t=')) return send(200, 'text/html', page('<h1 id="title" data-testid="title">KO results</h1>'));
             return send(200, 'text/html', page(
-                '<h1 id="title">Home</h1><p><a id="internal" href="/next" style="font-size:24px">Next page</a></p>',
+                '<h1 id="title" data-testid="title">Home</h1><p><a id="internal" href="/next" style="font-size:24px">Next page</a></p>',
             ));
         });
         await new Promise<void>((resolve) => this.server!.listen(this.port, '127.0.0.1', resolve));

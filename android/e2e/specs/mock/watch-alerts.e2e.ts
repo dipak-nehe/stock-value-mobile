@@ -2,6 +2,7 @@ import { expect } from '@wdio/globals';
 import MainScreen from '../../screens/MainScreen.js';
 import Notifications from '../../screens/Notifications.js';
 import WatchlistScreen from '../../screens/WatchlistScreen.js';
+import MockPage from '../../webpages/MockPage.js';
 import { MockSite, type Report } from '../../support/mockSite.js';
 import { inWebView, launchApp, removeReverse, resetApp, reversePort } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
@@ -27,7 +28,7 @@ describe('Filing alerts', () => {
 
     it('offers a Watch star on a company\'s results page', async () => {
         await inWebView(async () => {
-            await expect($('#title')).toHaveText('KO results');
+            await expect(MockPage.title).toHaveText('KO results');
         });
         await expect(MainScreen.watchButton('KO')).toBeDisplayed();
     });
@@ -59,7 +60,7 @@ describe('Filing alerts', () => {
         await expect(Notifications.notification('late-filing notice (NT 10-K)')).toBeDisplayed();
         await screenshot('notification shade with the two alerts');
         // exactly two: the report and the late filing; the SEC letter isn't announced
-        await expect($$('android=new UiSelector().textContains("COCA COLA CO (KO)")')).toBeElementsArrayOfSize(2);
+        await expect(Notifications.notifications('COCA COLA CO (KO)')).toBeElementsArrayOfSize(2);
         await Notifications.close();
         await WatchlistScreen.waitForDetail('Latest report: 10-Q filed 2026-07-29');
     });
@@ -69,7 +70,7 @@ describe('Filing alerts', () => {
         await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
         await Notifications.notification('Filed a new 10-Q on 2026-07-29').click();
         await inWebView(async () => {
-            await expect($('#title')).toHaveText('KO results', { wait: 30_000 });
+            await expect(MockPage.title).toHaveText('KO results', { wait: 30_000 });
             await expect(browser).toHaveUrl(expect.stringContaining('/?t=KO'));
         });
         expect(site.requests).toContain('/?t=KO'); // the page was really requested after the tap

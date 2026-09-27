@@ -1,5 +1,6 @@
 import { expect } from '@wdio/globals';
 import MainScreen from '../../screens/MainScreen.js';
+import MockPage from '../../webpages/MockPage.js';
 import { MockSite } from '../../support/mockSite.js';
 import { inWebView, launchApp, removeReverse, resetApp, reversePort } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
@@ -32,7 +33,7 @@ describe('Offline screen', () => {
         await MainScreen.retryButton.click();
         await expect(MainScreen.offlineTitle).not.toBeDisplayed({ wait: 30_000 });
         await inWebView(async () => {
-            await expect($('#title')).toHaveText('Home');
+            await expect(MockPage.title).toHaveText('Home');
         });
     });
 });
