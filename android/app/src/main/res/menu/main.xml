@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Shown only on a company's results page; title and icon switch between Watch and Watching. -->
+    <item
+        android:id="@+id/action_watch"
+        android:icon="@drawable/ic_star_border"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_watch_generic"
+        android:visible="false" />
+    <item
+        android:id="@+id/action_watchlist"
+        android:icon="@drawable/ic_list"
+        android:showAsAction="ifRoom"
+        android:title="@string/watchlist" />
+</menu>

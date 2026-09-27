@@ -52,8 +52,10 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.androidx.work.runtime)
 
     testImplementation(libs.junit)
+    testImplementation(libs.org.json)  // the real org.json, so JSON code runs in JVM unit tests
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
@@ -62,4 +64,5 @@ dependencies {
     androidTestImplementation(libs.espresso.web)
     androidTestImplementation(libs.espresso.intents)
     androidTestImplementation(libs.mockwebserver)
+    androidTestImplementation(libs.androidx.work.testing)
 }

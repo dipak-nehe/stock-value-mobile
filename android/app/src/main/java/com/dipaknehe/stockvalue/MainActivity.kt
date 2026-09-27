@@ -1,10 +1,13 @@
 package com.dipaknehe.stockvalue
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Message
 import android.view.View
@@ -19,22 +22,28 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
+import android.widget.Toolbar
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.net.toUri
 import androidx.core.view.updatePadding
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
-/** A full-screen WebView showing the web app, with loading, offline and back-navigation handling. */
+/** The web app in a WebView, with loading, offline and back handling, plus the Watch button for filing alerts. */
 class MainActivity : ComponentActivity() {
 
     companion object {
         /** Debug builds only: load this address instead of the live site (used by the instrumented tests). */
         const val EXTRA_SITE_URL = "com.dipaknehe.stockvalue.SITE_URL"
         const val USER_AGENT_TAG = "StockValueAndroid"
+
+        /** A page of the web app to open, e.g. from a filing-alert notification or the Watchlist screen. */
+        const val EXTRA_OPEN_URL = "com.dipaknehe.stockvalue.OPEN_URL"
     }
 
     private lateinit var siteUrl: String
@@ -43,8 +52,14 @@ class MainActivity : ComponentActivity() {
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var progress: ProgressBar
     private lateinit var errorPanel: View
+    private lateinit var toolbar: Toolbar
+    private lateinit var store: WatchStore
     private var mainFrameFailed = false
     private var rendererGone = false
+    private var currentTicker: String? = null
+
+    // Android 13+: alerts need the notification permission, asked for the first time a company is watched.
+    private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     // Enabled once there is (or is about to be) page history; disabled on a fully loaded first page, so the
     // system's predictive "back to home" animation works there. When pressed it checks the live history.
@@ -64,12 +79,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        siteUrl = intent.getStringExtra(EXTRA_SITE_URL)?.takeIf { BuildConfig.DEBUG } ?: BuildConfig.SITE_URL
+        intent.getStringExtra(EXTRA_SITE_URL)?.let { Site.debugOverride = it }
+        siteUrl = Site.url
         policy = SitePolicy(siteUrl)
+        store = WatchStore(this)
         webView = findViewById(R.id.web)
         refresh = findViewById(R.id.refresh)
         progress = findViewById(R.id.progress)
         errorPanel = findViewById(R.id.error)
+        toolbar = findViewById(R.id.toolbar)
+        toolbar.inflateMenu(R.menu.main)
+        toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_watch -> { toggleWatch(); true }
+                R.id.action_watchlist -> { startActivity(Intent(this, WatchlistActivity::class.java)); true }
+                else -> false
+            }
+        }
 
         applyInsets()
         configureWebView()
@@ -80,8 +106,60 @@ class MainActivity : ComponentActivity() {
         findViewById<Button>(R.id.retry).setOnClickListener { reload() }
 
         if (savedInstanceState == null || webView.restoreState(savedInstanceState) == null) {
-            webView.loadUrl(siteUrl)
+            webView.loadUrl(pageFrom(intent) ?: siteUrl)
         }
+    }
+
+    // A notification or the Watchlist screen asked for a page while the app was already open.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        pageFrom(intent)?.let {
+            mainFrameFailed = false
+            back.isEnabled = true
+            webView.loadUrl(it)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateWatchAction()  // the company may have been removed on the Watchlist screen
+    }
+
+    /** Only pages of the web app itself are opened this way. */
+    private fun pageFrom(intent: Intent?): String? =
+        intent?.getStringExtra(EXTRA_OPEN_URL)?.takeIf { policy.targetFor(it) == SitePolicy.Target.APP }
+
+    /** Show the Watch button on a company's results page, reflecting whether it's watched. */
+    private fun updateWatchAction(url: String? = webView.url) {
+        currentTicker = SiteUrls.tickerOf(url, siteUrl)
+        val item = toolbar.menu.findItem(R.id.action_watch) ?: return
+        val ticker = currentTicker
+        item.isVisible = ticker != null
+        if (ticker == null) return
+        val watching = store.contains(ticker)
+        item.setIcon(if (watching) R.drawable.ic_star else R.drawable.ic_star_border)
+        item.title = getString(if (watching) R.string.action_watching else R.string.action_watch, ticker)
+    }
+
+    private fun toggleWatch() {
+        val ticker = currentTicker ?: return
+        if (store.contains(ticker)) {
+            store.remove(ticker)
+            Toast.makeText(this, getString(R.string.unwatched, ticker), Toast.LENGTH_SHORT).show()
+        } else if (!store.add(ticker)) {
+            Toast.makeText(this, getString(R.string.watchlist_full, WatchStore.MAX), Toast.LENGTH_LONG).show()
+            return
+        } else {
+            Toast.makeText(this, getString(R.string.watched, ticker), Toast.LENGTH_LONG).show()
+            if (Build.VERSION.SDK_INT >= 33 &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            ) {
+                askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            FilingChecks.checkNow(this)  // records today's filings as the starting point
+        }
+        FilingChecks.sync(this)
+        updateWatchAction()
     }
 
     // The app draws edge to edge; pad the content so it sits between the status bar, navigation bar and keyboard.
@@ -170,6 +248,7 @@ class MainActivity : ComponentActivity() {
             progress.visibility = View.GONE
             refresh.isRefreshing = false
             back.isEnabled = view.canGoBack()  // history is settled once the page has loaded
+            updateWatchAction(url)
             if (!mainFrameFailed) showPage()
         }
 
@@ -189,8 +268,8 @@ class MainActivity : ComponentActivity() {
 
         override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
             if (view.canGoBack()) back.isEnabled = true  // only ever enable here: this can run before history updates
+            updateWatchAction(url)  // the web app changes the address (e.g. ?t=KO) without a page load
         }
-    
     }
 
     /** Open a link according to [SitePolicy]: in this WebView, in another app, or not at all. */

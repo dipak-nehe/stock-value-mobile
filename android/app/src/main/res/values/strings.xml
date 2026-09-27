@@ -6,4 +6,35 @@
     <string name="offline_message">Check your internet connection and try again.</string>
     <string name="retry">Try again</string>
     <string name="no_app_for_link">No app found to open this link</string>
+    <!-- Watch button and Watchlist -->
+    <string name="action_watch_generic">Watch</string>
+    <string name="action_watch">Watch %1$s for new filings</string>
+    <string name="action_watching">Watching %1$s (tap to stop)</string>
+    <string name="watched">Watching %1$s. You\'ll get a notification when it files a new report or a serious warning.</string>
+    <string name="unwatched">Stopped watching %1$s</string>
+    <string name="watchlist_full">The watchlist is full. Remove a company first (limit: %1$d).</string>
+    <string name="watchlist">Watchlist</string>
+    <string name="watchlist_intro">You\'ll get a notification when a company files a new annual or quarterly report, or a serious warning: a restatement warning, an auditor change, a late-filing notice or an amended annual report. Companies are checked about twice a day; your list stays on this phone.</string>
+    <string name="watchlist_empty">No companies yet. Open a company\'s analysis and tap the star to watch it.</string>
+    <string name="check_now">Check now</string>
+    <string name="checking">Checking…</string>
+    <string name="company_line" translatable="false">%1$s (%2$s)</string>
+    <string name="latest_report">Latest report: %1$s filed %2$s</string>
+    <string name="no_report">No annual or quarterly report found</string>
+    <string name="waiting_first_check">Waiting for the first check</string>
+    <string name="last_checked">Checked %1$s</string>
+    <string name="remove">Remove</string>
+    <string name="remove_ticker">Stop watching %1$s</string>
+    <string name="back">Back</string>
+
+    <!-- Filing alerts -->
+    <string name="channel_alerts">Filing alerts</string>
+    <string name="channel_alerts_description">New annual or quarterly reports and serious SEC warnings for companies you watch</string>
+    <string name="alert_title" translatable="false">%1$s (%2$s)</string>
+    <string name="alert_title_warning" translatable="false">⚠ %1$s (%2$s)</string>
+    <string name="alert_new_report">Filed a new %1$s on %2$s. Tap to see the updated analysis.</string>
+    <string name="alert_late_filing">Filed a late-filing notice (%1$s): it couldn\'t file a report on time.</string>
+    <string name="alert_non_reliance">Warned that earlier financial statements can\'t be relied on (a restatement).</string>
+    <string name="alert_auditor_change">Changed its independent auditor.</string>
+    <string name="alert_amendment">Amended its annual report (%1$s).</string>
 </resources>
