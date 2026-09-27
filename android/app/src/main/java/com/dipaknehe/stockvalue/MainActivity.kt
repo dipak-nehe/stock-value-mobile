@@ -175,6 +175,8 @@ class MainActivity : ComponentActivity() {
     // JavaScript is required: the web app is a JavaScript page. No JavaScript bridge is exposed to it.
     @SuppressLint("SetJavaScriptEnabled")
     private fun configureWebView() {
+        // Debug builds only: lets Appium (e2e/) and Chrome DevTools inspect the page. Release builds stay closed.
+        if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
         with(webView.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true          // the web app remembers the chosen language
