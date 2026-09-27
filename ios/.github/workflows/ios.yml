@@ -47,6 +47,37 @@ jobs:
             CODE_SIGNING_ALLOWED=NO | tee xcodebuild.log | grep -E "error:|warning: .*StockValue|Test Case|Executed|\*\* (TEST|BUILD)" || true
           grep -q "\*\* TEST SUCCEEDED \*\*" xcodebuild.log
 
+      # Proof it runs: install the app on the simulator, open it, and screenshot the live site inside it.
+      - name: Launch the app and take screenshots
+        if: success()
+        run: |
+          UDID=${{ steps.sim.outputs.udid }}
+          APP=$(find ~/Library/Developer/Xcode/DerivedData -path "*Debug-iphonesimulator/StockValue.app" -maxdepth 6 | head -1)
+          echo "app: $APP"
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$APP"
+          mkdir -p screenshots
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue
+          sleep 20
+          xcrun simctl io "$UDID" screenshot screenshots/1-start-page.png
+          xcrun simctl terminate "$UDID" com.dipaknehe.stockvalue
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -OpenURL "https://stock-value-analysis.vercel.app/?t=KO"
+          sleep 25
+          xcrun simctl io "$UDID" screenshot screenshots/2-ko-results.png
+          xcrun simctl terminate "$UDID" com.dipaknehe.stockvalue
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -AppleLanguages "(es)" -OpenURL "https://stock-value-analysis.vercel.app/?t=KO&lang=es"
+          sleep 25
+          xcrun simctl io "$UDID" screenshot screenshots/3-spanish.png
+
+      - name: Upload the screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: simulator-screenshots
+          path: screenshots/
+          if-no-files-found: ignore
+
       - name: Upload the test results
         if: always()
         uses: actions/upload-artifact@v7
