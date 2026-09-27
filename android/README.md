@@ -34,6 +34,25 @@ How it works: `FilingChecks.kt` schedules a WorkManager job every 12 hours while
 - **Keeps its place** on rotation and after the system recreates the screen.
 - The app identifies itself to the site with `StockValueAndroid/<version>` added to the browser's user agent.
 
+## Changing common things
+
+The Kotlin code is commented for this: each file starts with what it does, and the places you're most likely to change are marked **TO CHANGE …** in the code.
+
+| To change | Edit |
+|---|---|
+| The website the app shows | `SITE_URL` in `app/build.gradle.kts` |
+| The app's version for a release | `versionCode` (always goes up) and `versionName` in `app/build.gradle.kts` |
+| How often companies are checked | `12, TimeUnit.HOURS` in `FilingChecks.kt` (minimum 15 minutes) |
+| Which filings send an alert | `AlertRules.SERIOUS` in `Filings.kt` (plus the text in `AlertNotifier.warningText` and `strings.xml`) |
+| The most companies you can watch | `WatchStore.MAX` in `WatchStore.kt` |
+| Notification and screen texts | `res/values/strings.xml` (English) and `res/values-es/strings.xml` (Spanish) |
+| Colours | `res/values/colors.xml` (light) and `res/values-night/colors.xml` (dark) |
+| Which links open in the app or the browser | `SitePolicy.kt` |
+| Toolbar buttons | `res/menu/main.xml` and the menu listener in `MainActivity.onCreate` |
+| The API version (must match the web app) | `StatusApi.API_VERSION` in `StatusApi.kt` |
+
+After a change, run `./gradlew testDebugUnitTest lintDebug assembleDebug`; the unit tests cover the link rules, alert rules and JSON, and point to the test to update when a rule changes on purpose.
+
 ## Security and privacy
 
 - HTTPS only (`network_security_config.xml`). Debug builds also allow plain HTTP to `127.0.0.1` and `localhost`, for the tests' local server.

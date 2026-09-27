@@ -35,12 +35,35 @@ import androidx.core.net.toUri
 import androidx.core.view.updatePadding
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
-/** The web app in a WebView, with loading, offline and back handling, plus the Watch button for filing alerts. */
+/**
+ * The main screen: the web app in a WebView, with loading, offline and back handling, plus the Watch button for
+ * filing alerts. Android starts this screen when the app is opened (see AndroidManifest.xml).
+ *
+ * Map of this file, top to bottom:
+ *  - onCreate: finds the views, sets up the toolbar, WebView and Back, and loads the first page
+ *  - onNewIntent / pageFrom: opening a page asked for by a notification or the Watchlist screen
+ *  - updateWatchAction / toggleWatch: the ☆/★ Watch button
+ *  - applyInsets: keeping content clear of the status bar, navigation bar and keyboard
+ *  - configureWebView: WebView settings, the loading bar, new-tab links
+ *  - PageClient: what happens on each link, page load, error and renderer crash
+ *  - route / reload / load / showPage / showError / openElsewhere: small helpers used above
+ *
+ * WHERE TO CHANGE THINGS:
+ *  - the layout (toolbar, loading bar, offline panel): res/layout/activity_main.xml
+ *  - the toolbar buttons: res/menu/main.xml (ids action_watch, action_watchlist) and the listener in onCreate
+ *  - which links stay in the app: SitePolicy.kt
+ *  - texts: res/values/strings.xml and res/values-es/strings.xml; colours: res/values(-night)/colors.xml
+ *
+ * Kotlin notes: `class MainActivity : ComponentActivity()` means it extends ComponentActivity (an Android screen).
+ * `private lateinit var` properties are filled in onCreate. `object : SomeClass() { … }` creates a one-off
+ * anonymous subclass (like Java's `new SomeClass() { … }`).
+ */
 class MainActivity : ComponentActivity() {
 
     companion object {
         /** Debug builds only: load this address instead of the live site (used by the instrumented tests). */
         const val EXTRA_SITE_URL = "com.dipaknehe.stockvalue.SITE_URL"
+        // Added to the WebView's user agent ("… StockValueAndroid/1.0") so the site can tell app visits apart.
         const val USER_AGENT_TAG = "StockValueAndroid"
         private const val TAG = "StockValue"
 
@@ -48,6 +71,7 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_OPEN_URL = "com.dipaknehe.stockvalue.OPEN_URL"
     }
 
+    // The screen's parts, set in onCreate (ids come from res/layout/activity_main.xml).
     private lateinit var siteUrl: String
     private lateinit var policy: SitePolicy
     private lateinit var webView: WebView
@@ -56,9 +80,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var errorPanel: View
     private lateinit var toolbar: Toolbar
     private lateinit var store: WatchStore
-    private var mainFrameFailed = false
-    private var rendererGone = false
-    private var currentTicker: String? = null
+    private var mainFrameFailed = false          // the page failed to load: keep the offline panel showing
+    private var rendererGone = false             // the WebView's renderer died; the screen is being recreated
+    private var currentTicker: String? = null    // the company on screen (null on the start or compare page)
 
     // Android 13+: alerts need the notification permission, asked for the first time a company is watched.
     private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -91,6 +115,7 @@ class MainActivity : ComponentActivity() {
         errorPanel = findViewById(R.id.error)
         toolbar = findViewById(R.id.toolbar)
         toolbar.inflateMenu(R.menu.main)
+        // The toolbar buttons. TO ADD ONE: add an <item> to res/menu/main.xml and a branch here.
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_watch -> { toggleWatch(); true }
@@ -150,6 +175,7 @@ class MainActivity : ComponentActivity() {
         item.title = getString(if (watching) R.string.action_watching else R.string.action_watch, ticker)
     }
 
+    /** The ☆ button: watch the company on screen, or stop watching it. */
     private fun toggleWatch() {
         val ticker = currentTicker ?: return
         if (store.contains(ticker)) {
@@ -186,17 +212,19 @@ class MainActivity : ComponentActivity() {
     private fun configureWebView() {
         // Debug builds only: lets Appium (e2e/) and Chrome DevTools inspect the page. Release builds stay closed.
         if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
+        // `with(x) { … }` runs the block with x as `this`, so `javaScriptEnabled = …` sets webView.settings.javaScriptEnabled.
         with(webView.settings) {
             javaScriptEnabled = true
             domStorageEnabled = true          // the web app remembers the chosen language
-            allowFileAccess = false
+            allowFileAccess = false           // security: the page can't read files on the phone
             allowContentAccess = false
-            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW  // never load http content into the https page
             setSupportMultipleWindows(true)   // target=_blank links arrive in onCreateWindow (see below)
             userAgentString = "$userAgentString $USER_AGENT_TAG/${BuildConfig.VERSION_NAME}"
         }
         webView.webViewClient = PageClient()
         webView.webChromeClient = object : WebChromeClient() {
+            // Moves the thin loading bar at the top (0–100).
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 progress.progress = newProgress
             }
@@ -241,7 +269,9 @@ class MainActivity : ComponentActivity() {
     /** Keeps the web app's pages in the WebView and handles loading, errors and renderer crashes. */
     // onRenderProcessGone is implemented below; the androidx.webkit lint check doesn't detect it (false positive).
     @SuppressLint("MissingOnRenderProcessGone")
+    // `inner` lets this class use MainActivity's properties (webView, policy, back, …).
     private inner class PageClient : WebViewClient() {
+        // Called for every link the user follows: true = "the app handles it", false = "load it in the WebView".
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             if (policy.targetFor(request.url.toString()) == SitePolicy.Target.APP) {
                 back.isEnabled = true  // this navigation adds history; Back may be pressed before it finishes loading
@@ -263,6 +293,7 @@ class MainActivity : ComponentActivity() {
             if (!mainFrameFailed) showPage()
         }
 
+        // Only a failure of the page itself shows the offline panel (not a missing image or script).
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
             if (request.isForMainFrame) showError()
         }
@@ -295,6 +326,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Pull-to-refresh and "Try again": reload the page, or the start page if nothing loaded yet. */
     private fun reload() {
         mainFrameFailed = false
         val current = webView.url
@@ -311,6 +343,7 @@ class MainActivity : ComponentActivity() {
         if (BuildConfig.DEBUG) Log.d(TAG, message)
     }
 
+    // Show the page and hide the offline panel, or the other way round (the panel is in activity_main.xml, id "error").
     private fun showPage() {
         errorPanel.visibility = View.GONE
         webView.visibility = View.VISIBLE
@@ -323,6 +356,7 @@ class MainActivity : ComponentActivity() {
         refresh.isRefreshing = false
     }
 
+    /** Open a link in another app (browser, mail), or say no app can open it. */
     private fun openElsewhere(uri: Uri) {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE))
@@ -331,6 +365,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Keep the WebView's page and history when Android recreates the screen (e.g. after low memory).
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (!rendererGone) webView.saveState(outState)

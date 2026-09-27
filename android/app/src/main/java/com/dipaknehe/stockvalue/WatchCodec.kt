@@ -3,8 +3,15 @@ package com.dipaknehe.stockvalue
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** Saves the watchlist as JSON. Separate from [WatchStore] so it's unit-tested without Android. */
+/**
+ * Turns the watchlist into JSON text and back, so [WatchStore] can save it. Kept separate from WatchStore
+ * so it's unit-tested without Android (JsonTest).
+ *
+ * IF YOU ADD A FIELD to [Watched] (Filings.kt): write it in [encode], read it in [decode] with a default for lists
+ * saved before the change (like `optBoolean("baselined", false)`), and extend the round-trip test in JsonTest.
+ */
 object WatchCodec {
+    // `JSONArray().apply { … }` builds the array and runs the block on it (`put` means `this.put`).
     fun encode(list: List<Watched>): String = JSONArray().apply {
         list.forEach { w ->
             put(JSONObject().apply {
@@ -21,11 +28,13 @@ object WatchCodec {
     }.toString()
 
     fun decode(json: String?): List<Watched> {
-        if (json.isNullOrBlank()) return emptyList()
+        if (json.isNullOrBlank()) return emptyList() // nothing saved yet
         val a = JSONArray(json)
+        // `(0 until n).map { i -> … }` loops i = 0..n-1 and collects the results into a list.
         return (0 until a.length()).map { i ->
             val o = a.getJSONObject(i)
             val seen = o.optJSONArray("seenEvents") ?: JSONArray()
+            // Named arguments (`ticker = …`) make the constructor call readable; order doesn't matter.
             Watched(
                 ticker = o.getString("ticker"),
                 name = if (o.isNull("name")) null else o.getString("name"),
