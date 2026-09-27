@@ -1,7 +1,7 @@
-"""Count the Allure results of the end-to-end run for the email summary.
+"""Count the Allure results of the end-to-end run and show them on the GitHub run's summary page.
 
 A test re-run by specFileRetries has a result per attempt; only its last attempt counts.
-Writes passed/failed/broken/skipped/total to $GITHUB_OUTPUT and prints them.
+Writes passed/failed/broken/skipped/total to $GITHUB_OUTPUT and $GITHUB_STEP_SUMMARY, and prints them.
 
 Usage: python3 .github/scripts/allure_counts.py e2e/allure-results
 """
@@ -28,6 +28,11 @@ def main(folder):
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
             fh.writelines(f"{k}={v}\n" for k, v in counts.items())
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as fh:
+            fh.write(f"### Appium end-to-end: {counts['passed']}/{counts['total']} passed\n\n"
+                     f"failed {counts['failed']} · broken {counts['broken']} · skipped {counts['skipped']} "
+                     "(a retried test counts once, by its last attempt). Report: the **appium-allure-report** artifact.\n")
 
 
 if __name__ == "__main__":
