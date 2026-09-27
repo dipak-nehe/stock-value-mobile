@@ -25,17 +25,7 @@ jobs:
 
       - name: Pick an iPhone simulator
         id: sim
-        run: |
-          UDID=$(xcrun simctl list devices available --json | python3 -c '
-          import json, sys
-          devices = json.load(sys.stdin)["devices"]
-          ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[-1].split("-")], reverse=True)
-          for runtime in ios:
-              phones = [d for d in devices[runtime] if d["name"].startswith("iPhone")]
-              if phones:
-                  print(phones[0]["udid"]); break')
-          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
-          xcrun simctl list devices | grep "$UDID"
+        run: python3 .github/scripts/pick_simulator.py
 
       - name: Build and run the unit tests
         run: |
@@ -86,4 +76,85 @@ jobs:
           path: |
             TestResults.xcresult
             xcodebuild.log
+          if-no-files-found: ignore
+
+  # The app driven like a person would, on a simulator: WebdriverIO + Appium (XCUITest), against a local mock of the
+  # web app and against the live site. Allure report with a screenshot and a video of every test.
+  e2e:
+    name: Appium end-to-end (WebdriverIO)
+    runs-on: macos-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Generate the Xcode project (XcodeGen, from project.yml)
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Pick an iPhone simulator
+        id: sim
+        run: python3 .github/scripts/pick_simulator.py
+
+      # -derivedDataPath build: the app lands where e2e/support/capabilities.ts looks for it.
+      - name: Build the app for the simulator
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project StockValue.xcodeproj -scheme StockValue \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO | tee xcodebuild-app.log | grep -E "error:|\*\* BUILD" || true
+          test -d build/Build/Products/Debug-iphonesimulator/StockValue.app
+
+      - name: Install WebdriverIO, Appium and the XCUITest driver
+        working-directory: e2e
+        run: |
+          npm ci
+          npm run typecheck
+          npm run appium:drivers
+
+      - name: Boot the simulator
+        run: |
+          xcrun simctl boot "${{ steps.sim.outputs.udid }}" 2>/dev/null || true
+          xcrun simctl bootstatus "${{ steps.sim.outputs.udid }}" -b
+
+      - name: Run the mock and live suites
+        working-directory: e2e
+        env:
+          IOS_UDID: ${{ steps.sim.outputs.udid }}
+          IOS_DEVICE_NAME: ${{ steps.sim.outputs.name }}
+          IOS_VERSION: ${{ steps.sim.outputs.version }}
+        run: npm test
+
+      - name: Build the Allure report
+        if: always()
+        working-directory: e2e
+        run: npm run report
+
+      - name: Count the results
+        if: always()
+        run: python3 .github/scripts/allure_counts.py e2e/allure-results
+
+      - name: Upload the Allure report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: appium-allure-report
+          path: e2e/allure-report/
+          if-no-files-found: ignore
+
+      - name: Upload the Appium and WebdriverIO logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: appium-logs
+          path: |
+            e2e/logs/
+            xcodebuild-app.log
           if-no-files-found: ignore

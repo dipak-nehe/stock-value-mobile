@@ -28,6 +28,9 @@ struct AlertNotifier {
         content.sound = .default
         // The page to open when tapped (AppDelegate reads it). trigger: nil = show now.
         content.userInfo = ["url": SiteURLs.results(siteURL: siteURL, ticker: alert.ticker, tab: tab)]
+        // Its own thread per alert: iOS would otherwise stack all of the app's alerts into one pile, hiding all but
+        // the newest (Android does the same with one notification group per alert).
+        content.threadIdentifier = Self.id(for: alert)
         let request = UNNotificationRequest(identifier: Self.id(for: alert), content: content, trigger: nil)
         try? await UNUserNotificationCenter.current().add(request)
     }
