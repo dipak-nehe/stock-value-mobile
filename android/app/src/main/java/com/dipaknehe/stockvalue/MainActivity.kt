@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Message
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.RenderProcessGoneDetail
@@ -44,8 +45,16 @@ class MainActivity : ComponentActivity() {
     private var mainFrameFailed = false
     private var rendererGone = false
 
+    // Enabled only while the page has history, so at the first page the system's predictive "back to home" works.
     private val back = object : OnBackPressedCallback(false) {
-        override fun handleOnBackPressed() = webView.goBack()
+        override fun handleOnBackPressed() {
+            if (webView.canGoBack()) {
+                webView.goBack()
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,13 +101,46 @@ class MainActivity : ComponentActivity() {
             allowFileAccess = false
             allowContentAccess = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-            setSupportMultipleWindows(false)  // target=_blank links come through shouldOverrideUrlLoading
+            setSupportMultipleWindows(true)   // target=_blank links arrive in onCreateWindow (see below)
             userAgentString = "$userAgentString $USER_AGENT_TAG/${BuildConfig.VERSION_NAME}"
         }
         webView.webViewClient = PageClient()
         webView.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 progress.progress = newProgress
+            }
+
+            // A new-tab link (target=_blank). Hand the page a throwaway WebView, read the address it tries to load,
+            // and route that address like any other link.
+            override fun onCreateWindow(view: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message): Boolean {
+                val popup = WebView(view.context)
+                popup.webViewClient = object : WebViewClient() {
+                    private var handled = false
+
+                    private fun take(uri: Uri) {
+                        if (handled) return
+                        handled = true
+                        route(uri)
+                        popup.post { popup.destroy() }
+                    }
+
+                    override fun shouldOverrideUrlLoading(v: WebView, request: WebResourceRequest): Boolean {
+                        take(request.url)
+                        return true
+                    }
+
+                    override fun onPageStarted(v: WebView, url: String?, favicon: Bitmap?) {
+                        if (!url.isNullOrEmpty() && url != "about:blank") take(Uri.parse(url))
+                    }
+
+                    override fun onRenderProcessGone(v: WebView, detail: RenderProcessGoneDetail): Boolean {
+                        v.destroy()
+                        return true
+                    }
+                }
+                (resultMsg.obj as WebView.WebViewTransport).webView = popup
+                resultMsg.sendToTarget()
+                return true
             }
         }
     }
@@ -108,12 +150,9 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MissingOnRenderProcessGone")
     private inner class PageClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            val url = request.url.toString()
-            return when (policy.targetFor(url)) {
-                SitePolicy.Target.APP -> false
-                SitePolicy.Target.BROWSER -> { openElsewhere(request.url); true }
-                SitePolicy.Target.BLOCK -> true
-            }
+            if (policy.targetFor(request.url.toString()) == SitePolicy.Target.APP) return false
+            route(request.url)
+            return true
         }
 
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
@@ -123,6 +162,7 @@ class MainActivity : ComponentActivity() {
         override fun onPageFinished(view: WebView, url: String?) {
             progress.visibility = View.GONE
             refresh.isRefreshing = false
+            back.isEnabled = view.canGoBack()  // history is settled by now (doUpdateVisitedHistory can come too early)
             if (!mainFrameFailed) showPage()
         }
 
@@ -144,6 +184,15 @@ class MainActivity : ComponentActivity() {
             back.isEnabled = view.canGoBack()
         }
     
+    }
+
+    /** Open a link according to [SitePolicy]: in this WebView, in another app, or not at all. */
+    private fun route(uri: Uri) {
+        when (policy.targetFor(uri.toString())) {
+            SitePolicy.Target.APP -> webView.loadUrl(uri.toString())
+            SitePolicy.Target.BROWSER -> openElsewhere(uri)
+            SitePolicy.Target.BLOCK -> Unit
+        }
     }
 
     private fun reload() {
