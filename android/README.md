@@ -4,6 +4,8 @@
 
 An Android app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Graham & Buffett checklists and a side-by-side compare page. The app is a small native shell around a WebView, so it always shows the current version of the web app ([source](https://github.com/dipak-nehe/stock-trend-analyzer)) with no separate release needed for content changes.
 
+**How it's built:** [docs/architecture.md](docs/architecture.md): system context, components, the page and alert flows, data, security, testing and CI, with diagrams.
+
 ## Filing alerts
 
 The part the website can't do: **watch companies and get a notification when they file something that matters.**
@@ -112,6 +114,7 @@ app/src/androidTest/     emulator tests
 gradle/libs.versions.toml  dependency versions
 .github/scripts/         Allure result counts (run summary) and optional report publishing (Vercel)
 e2e/                     WebdriverIO + Appium end-to-end tests (TypeScript) and Allure report
+docs/architecture.md     architecture with diagrams
 ```
 
 ## Not included yet
