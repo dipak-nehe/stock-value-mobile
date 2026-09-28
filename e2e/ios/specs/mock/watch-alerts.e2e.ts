@@ -4,7 +4,7 @@ import Notifications from '../../screens/Notifications.js';
 import WatchlistScreen from '../../screens/WatchlistScreen.js';
 import MockPage from '../../../shared/webpages/MockPage.js';
 import { MockSite, type Report } from '../../../shared/mockSite.js';
-import { inWebView, launchApp, resetApp } from '../../support/app.js';
+import { activateApp, inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
 const Q2: Report = { form: '10-Q', date: '2026-04-28', accession: '0000021344-26-000010', url: 'https://www.sec.gov/q2.htm' };
@@ -59,11 +59,12 @@ describe('Filing alerts', () => {
         await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
         await expect(Notifications.notification('late-filing notice (NT 10-K)')).toBeDisplayed();
         await screenshot('Notification Center with the two alerts');
-        // Only the report and the late filing: every Coca-Cola notification is one of those two (the SEC letter
-        // isn't announced).
+        // The report and the late filing are announced; the SEC letter isn't. (iOS exposes each card as several
+        // elements and may add a group label, so check the texts rather than count elements.)
         const texts = await Notifications.texts('COCA COLA CO (KO)');
-        expect(texts.length).toBeGreaterThan(0);
-        for (const t of texts) expect(/Filed a new 10-Q on 2026-07-29|late-filing notice \(NT 10-K\)/.test(t)).toBe(true);
+        expect(texts.some((t) => t.includes('Filed a new 10-Q on 2026-07-29'))).toBe(true);
+        expect(texts.some((t) => t.includes('late-filing notice (NT 10-K)'))).toBe(true);
+        expect(texts.filter((t) => /UPLOAD|comment letter|letter from/i.test(t))).toEqual([]);
         await Notifications.close();
     });
 
@@ -83,6 +84,7 @@ describe('Filing alerts', () => {
     });
 
     it('can stop watching from the Watchlist', async () => {
+        await activateApp(); // in front, even if an earlier step left Notification Center open
         await MainScreen.openWatchlist();
         await WatchlistScreen.removeButton('KO').click();
         await expect(WatchlistScreen.emptyMessage).toBeDisplayed();

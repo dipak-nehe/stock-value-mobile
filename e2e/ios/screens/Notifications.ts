@@ -59,13 +59,26 @@ class Notifications {
     async tap(text: string): Promise<void> {
         const card = this.notification(text);
         const { x, y, width, height } = await card.getLocation().then(async (at) => ({ ...at, ...(await card.getSize()) }));
-        await card.click();
+        const cx = Math.round(x + width / 2), cy = Math.round(y + height / 2);
         const opened = () => card.isDisplayed().then((shown) => !shown, () => true);
-        if (!(await browser.waitUntil(opened, { timeout: 4_000 }).catch(() => false))) {
-            await driver.execute('mobile: tap', { x: Math.round(x + width / 2), y: Math.round(y + height / 2) });
-            await browser.waitUntil(opened, { timeout: 10_000, timeoutMsg: 'Notification Center stayed open after tapping the notification' });
+        // iOS 26 doesn't always open the app for a synthesized tap on a Notification Center card, so try, in turn:
+        // an element tap, a coordinate tap, then a swipe right across the card (which opens a notification there).
+        const attempts: [string, () => Promise<unknown>][] = [
+            ['element tap', () => card.click()],
+            ['coordinate tap', () => driver.execute('mobile: tap', { x: cx, y: cy })],
+            ['swipe right', () => driver.execute('mobile: dragFromToForDuration', { fromX: x + 20, fromY: cy, toX: x + width - 10, toY: cy, duration: 0.3 })],
+        ];
+        let worked = '';
+        for (const [name, attempt] of attempts) {
+            await attempt().catch(() => undefined);
+            if (await browser.waitUntil(opened, { timeout: 5_000 }).catch(() => false)) {
+                worked = name;
+                break;
+            }
         }
+        allureReporter.addAttachment('how the notification was opened', worked || 'none of: element tap, coordinate tap, swipe right', 'text/plain');
         await driver.updateSettings({ defaultActiveApplication: 'auto' });
+        if (!worked) throw new Error('Notification Center stayed open after tapping, tapping by position and swiping the notification');
         await browser.pause(1_000);
     }
 }
