@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "Test code shared by e2e/android and e2e/ios (web page objects, mock web app). ES modules, like both packages.",
+  "type": "module"
+}
