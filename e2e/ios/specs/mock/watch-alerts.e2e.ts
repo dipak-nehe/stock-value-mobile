@@ -33,8 +33,9 @@ describe('Filing alerts', () => {
 
     it('watching records the current filings as the starting point, without a notification', async () => {
         await MainScreen.watch('KO');
+        // (Not the 3-second "Watching KO…" message: watching first asks the site, then iOS asks for notification
+        // permission, and that message can be gone by the time the test looks. The ★ is the lasting proof.)
         await expect(MainScreen.watchingButton('KO')).toBeDisplayed();
-        await expect(MainScreen.toast).toHaveText(expect.stringContaining('Watching KO'));
 
         await MainScreen.openWatchlist();
         await expect(WatchlistScreen.row('KO')).toHaveText(expect.stringContaining('COCA COLA CO (KO)'), { wait: 60_000 });

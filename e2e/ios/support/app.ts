@@ -10,6 +10,12 @@ export async function resetApp(): Promise<void> {
     await driver.execute('mobile: terminateApp', { bundleId: BUNDLE_ID }).catch(() => undefined);
     await driver.removeApp(BUNDLE_ID).catch(() => undefined); // not installed yet on a fresh simulator
     await driver.installApp(APP);
+    // iOS registers a new install a moment later; launching before that fails with "unknown to FrontBoard".
+    await browser.waitUntil(() => driver.execute('mobile: isAppInstalled', { bundleId: BUNDLE_ID }) as Promise<boolean>, {
+        timeout: 30_000,
+        timeoutMsg: 'the app never showed up as installed',
+    });
+    await browser.pause(2_000);
 }
 
 /**
@@ -24,8 +30,14 @@ export async function launchApp(options: { site?: string; open?: string; lang?: 
     if (options.open) args.push('-OpenURL', options.open);
     if (options.lang) args.push('-AppleLanguages', `(${options.lang})`, '-AppleLocale', options.lang === 'es' ? 'es_ES' : 'en_US');
     await driver.execute('mobile: terminateApp', { bundleId: BUNDLE_ID }).catch(() => undefined);
-    // An array, not a shell command: addresses with '&' arrive intact.
-    await driver.execute('mobile: launchApp', { bundleId: BUNDLE_ID, arguments: args });
+    // An array, not a shell command: addresses with '&' arrive intact. Retry once if iOS hasn't finished
+    // registering a fresh install ("unknown to FrontBoard").
+    const launch = () => driver.execute('mobile: launchApp', { bundleId: BUNDLE_ID, arguments: args });
+    await launch().catch(async (e: unknown) => {
+        if (!/unknown to FrontBoard|RequestDenied/.test(String(e))) throw e;
+        await browser.pause(5_000);
+        await launch();
+    });
 }
 
 /** Brings the app back to the front (e.g. after the Home screen or Notification Center). */
