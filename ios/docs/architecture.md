@@ -245,7 +245,7 @@ The repository is public, so GitHub's macOS minutes are free (private repositori
 | Storage | SharedPreferences (JSON) | UserDefaults (Codable JSON) |
 | Debug overrides for tests | Intent extras | Launch arguments (`-SiteURL`, `-OpenURL`) |
 | Build | Gradle, locally or CI | XcodeGen + Xcode, CI only (no Xcode on the developer's Mac) |
-| Tests | 21 unit, 12 Espresso, 34 Appium | 22 unit, launch screenshots, 34 Appium |
+| Tests | 21 unit, 11 Espresso, 34 Appium | 22 unit, launch screenshots, 34 Appium |
 
 ---
 

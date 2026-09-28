@@ -208,7 +208,7 @@ Also stored: the WebView's own data (the web app remembers the chosen language i
 ```mermaid
 flowchart TB
     e2e["End-to-end: WebdriverIO + Appium (UiAutomator2)<br/>34 tests · native + WebView · mock and live site<br/>accessibility · Spanish · compare · Allure screenshots + video"]
-    inst["Instrumented: Espresso + Espresso-Web + WorkManager testing<br/>12 tests · MockWebServer"]
+    inst["Instrumented: Espresso + Espresso-Web + WorkManager testing<br/>11 tests · MockWebServer"]
     unit["JVM unit tests: 21 tests<br/>SitePolicy · SiteUrls · AlertRules · JSON · API version"]
     lint["Android Lint (warnings = errors)"]
     e2e --- inst --- unit --- lint

@@ -30,7 +30,7 @@ Architecture with diagrams: [android/docs/architecture.md](android/docs/architec
 | | Android | iOS |
 |---|---|---|
 | Unit | 21 JVM tests | 22 XCTest tests |
-| Instrumented | 12 Espresso tests | (launch check with screenshots) |
+| Instrumented | 11 Espresso tests | (launch check with screenshots) |
 | End-to-end | 34 Appium tests (UiAutomator2) | 34 Appium tests (XCUITest) |
 
 The end-to-end suites run against a local mock of the web app (exact checks: browsing, offline screen, watch → real notification → tap opens the company, Spanish, accessibility) and against the live site (analysis, compare, a tab tour, a wrong ticker). Every test gets a screenshot and a video in its Allure report.

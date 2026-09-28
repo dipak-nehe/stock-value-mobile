@@ -135,15 +135,6 @@ class WatchTest {
     }
 
     @Test
-    fun anUnknownTickerAlreadyOnTheListIsDroppedByTheNextCheck() {
-        store.add("ZZZZQ")
-        store.add("KO")
-        store.update(Watched("KO", "COCA COLA CO", Q2, emptySet(), baselined = true, lastChecked = 1L))
-        runCheck()
-        assertEquals(listOf("KO"), store.all().map { it.ticker })
-    }
-
-    @Test
     fun watchingRecordsTheStartingPointAndShowsInTheWatchlist() {
         launch(SiteUrls.results(site(), "KO")).use {
             eventually { onView(withId(R.id.action_watch)).check(matches(isDisplayed())) }
@@ -196,12 +187,12 @@ class WatchTest {
     }
 
     @Test
-    fun anUnknownTickerDoesNotStopTheOthers() {
+    fun anUnknownTickerDoesNotStopTheOthersAndIsDropped() {
         store.add("ZZZZQ")
         store.add("KO")
         assertEquals(ListenableWorker.Result.success(), runCheck())
         assertTrue(store.all().first { it.ticker == "KO" }.baselined)
-        assertTrue(!store.all().first { it.ticker == "ZZZZQ" }.baselined)
+        assertEquals(listOf("KO"), store.all().map { it.ticker }) // SEC doesn't know ZZZZQ: it's removed
     }
 
     @Test
