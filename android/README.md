@@ -1,6 +1,6 @@
 # 10-Year Stock Value Analysis for Android
 
-[![android](https://github.com/dipak-nehe/stock-value-android/actions/workflows/android.yml/badge.svg)](https://github.com/dipak-nehe/stock-value-android/actions/workflows/android.yml)
+[![android](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/android.yml/badge.svg)](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/android.yml)
 
 An Android app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Graham & Buffett checklists and a side-by-side compare page. The app is a small native shell around a WebView, so it always shows the current version of the web app ([source](https://github.com/dipak-nehe/stock-trend-analyzer)) with no separate release needed for content changes.
 
@@ -73,7 +73,7 @@ Requirements: JDK 17+ (CI uses Temurin 21) and the Android SDK (`local.propertie
 ./gradlew connectedDebugAndroidTest   # emulator/device tests
 ```
 
-To install on a phone without Android Studio: download the **stock-value-debug-apk** artifact from the latest [Actions run](https://github.com/dipak-nehe/stock-value-android/actions), copy the APK to the phone, and open it (allow installing from that source when asked). Or with USB debugging on: `adb install app-debug.apk`.
+To install on a phone without Android Studio: download the **stock-value-debug-apk** artifact from the latest [Actions run](https://github.com/dipak-nehe/stock-value-mobile/actions), copy the APK to the phone, and open it (allow installing from that source when asked). Or with USB debugging on: `adb install app-debug.apk`.
 
 ## Tests
 
@@ -83,11 +83,11 @@ To install on a phone without Android Studio: download the **stock-value-debug-a
 | **Emulator** (Espresso + Espresso-Web + WorkManager testing, 12 tests) | `app/src/androidTest/…` | Against a local test server. `MainActivityTest`: the page loads and the user agent names the app; a link within the site stays in the app and Back returns; external and new-tab links go to the browser; the offline screen appears and *Try again* recovers. `WatchTest`: the Watch button shows only on a results page; watching records the starting point without alerts and shows in the Watchlist, where it can be removed; a check posts exactly the expected notifications once; an unknown ticker doesn't stop the others; a notification opens the company's page |
 | **Lint** | `./gradlew lintDebug` | Android Lint with warnings as errors (version-update checks are left to Dependabot) |
 
-GitHub Actions (`.github/workflows/android.yml`) runs three jobs on every push: unit tests, lint and the debug APK (uploaded); the Espresso tests on an Android 14 emulator; and the WebdriverIO + Appium suites on another emulator, with the Allure report uploaded.
+GitHub Actions (`.github/workflows/android.yml` at the repo root; it runs when `android/`, `e2e/android/` or `e2e/shared/` change) runs three jobs on every push: unit tests, lint and the debug APK (uploaded); the Espresso tests on an Android 14 emulator; and the WebdriverIO + Appium suites on another emulator, with the Allure report uploaded.
 
 ## End-to-end tests (WebdriverIO + Appium)
 
-`e2e/` is a TypeScript test framework that drives the installed app the way a person does, through **WebdriverIO 9**, **Appium 3** and the **UiAutomator2** driver, and writes an **Allure** report.
+`e2e/android/` (at the repo root) is a TypeScript test framework that drives the installed app the way a person does, through **WebdriverIO 9**, **Appium 3** and the **UiAutomator2** driver, and writes an **Allure** report.
 
 - **Hybrid:** steps switch between the native app (toolbar star, Watchlist, notification shade, offline screen, Back) and the page inside the WebView (`inWebView(...)` switches Appium to the `WEBVIEW_…` context; chromedriver is downloaded to match the device's WebView). Debug builds turn on WebView debugging for this.
 - **Two suites (34 tests):**
@@ -100,7 +100,7 @@ GitHub Actions (`.github/workflows/android.yml`) runs three jobs on every push: 
 - **Structure:** `wdio.conf.ts` (runner, Appium service, reporters, video and screenshots per test), `support/capabilities.ts` (Android/UiAutomator2 capabilities), `support/app.ts` (launch with intent extras, reset, adb, WebView switching, selector helpers), `screens/` (native screen objects: `MainScreen`, `WatchlistScreen`, `Notifications`), `webpages/` (page objects for the web content inside the WebView: `WebAnalysisPage`, `WebComparePage`, `MockPage`), `specs/mock/` and `specs/live/`.
 - **Page objects only:** the specs contain no selectors; every element is defined once in `screens/` or `webpages/`. Native screen objects and web page objects take a language (`new MainScreen('es')`, `new WebAnalysisPage('es')`), so the Spanish specs call the same methods.
 - **Locator order.** Native screens: accessibility id (`~`, what TalkBack reads) → resource-id → UiSelector text, never XPath. Web content: accessible name (`aria/`, like Playwright's getByRole/getByLabel) for controls → `data-testid` for content → `#id` only where the name is incidental text (arrows, counts) or shared with another element, commented in the page object.
-- **Latest report online:** https://stock-value-android-test-report.vercel.app (published from `main` when the `VERCEL_TOKEN` secret is set: `gh secret set VERCEL_TOKEN -R dipak-nehe/stock-value-android`, a token from vercel.com/account/settings/tokens with access to the whole account). Each run's summary page links to that run's own report too.
+- **Latest report online:** https://stock-value-android-test-report.vercel.app (published from `main` when the `VERCEL_TOKEN` secret is set: `gh secret set VERCEL_TOKEN -R dipak-nehe/stock-value-mobile`, a token from vercel.com/account/settings/tokens with access to the whole account). Each run's summary page links to that run's own report too.
 - **Allure:** a **video of every test** (the emulator's screen recorder via Appium, first 3 minutes; `E2E_VIDEO=0` turns it off), a named screenshot after every test (passed or failed) and at key steps (the notification shade with the alerts, the screens in Spanish), the accessibility findings as JSON, and the native UI tree on failure. CI uploads a single-file report as the **appium-allure-report** artifact.
 - **CI stability:** the job frees disk space for the emulator, warms the device up before testing, and re-runs a failed spec file once (`specFileRetries`, CI only). A real failure fails twice and still fails the job.
 
@@ -108,7 +108,7 @@ Run locally (needs Node 20.19+, a running emulator or a USB-connected phone with
 
 ```bash
 ./gradlew assembleDebug          # the APK the tests install
-cd e2e
+cd e2e/android   # from the repo root
 npm ci                           # WebdriverIO, Appium and the UiAutomator2 driver (local, nothing global)
 npm run appium:drivers           # should list uiautomator2
 npm run test:mock                # or: npm run test:live, npm run test:a11y, npm test (all)
@@ -134,8 +134,9 @@ app/src/debug/res/xml/   debug-only network security config for the tests' local
 app/src/test/            JVM unit tests
 app/src/androidTest/     emulator tests
 gradle/libs.versions.toml  dependency versions
-.github/scripts/         Allure result counts (run summary) and optional report publishing (Vercel)
-e2e/                     WebdriverIO + Appium end-to-end tests (TypeScript) and Allure report
+../.github/scripts/      Allure result counts (run summary) and optional report publishing (Vercel)
+../e2e/android/          WebdriverIO + Appium end-to-end tests (TypeScript) and Allure report;
+                         the web page objects and mock site are shared with iOS in ../e2e/shared/
 docs/architecture.md     architecture with diagrams
 ```
 

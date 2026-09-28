@@ -1,8 +1,8 @@
 # 10-Year Stock Value Analysis for iOS
 
-[![ios](https://github.com/dipak-nehe/stock-value-ios/actions/workflows/ios.yml/badge.svg)](https://github.com/dipak-nehe/stock-value-ios/actions/workflows/ios.yml)
+[![ios](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/ios.yml/badge.svg)](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/ios.yml)
 
-An iPhone and iPad app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Graham & Buffett checklists and a compare page. Like its [Android sibling](https://github.com/dipak-nehe/stock-value-android), it's a small native shell around the web app, plus what a website can't do: a **watchlist with filing alerts**.
+An iPhone and iPad app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Graham & Buffett checklists and a compare page. Like its [Android sibling](../android/), it's a small native shell around the web app, plus what a website can't do: a **watchlist with filing alerts**.
 
 ## What it does
 
@@ -32,9 +32,9 @@ Running on your own iPhone needs an Apple ID in Xcode (free, 7-day signing); Tes
 |---|---|---|
 | **Unit** (XCTest) | `StockValueTests/` | The same cases as the Android unit tests: link rules (incl. lookalike hosts, plain http, blocked schemes), results-page detection, alert rules (baseline, once-only, oldest first, letters ignored), reading the API response, saving and capping the watchlist, the API version contract |
 
-| **End-to-end** (WebdriverIO + Appium XCUITest, TypeScript, `e2e/`) | `e2e/specs/` | The app driven like a person on a simulator: a `mock` suite against a local copy of the web app (browsing, offline screen, watch → real notification in Notification Center → tap opens the company, Spanish, native accessibility at 44 pt and axe-core on the page) and a `live` suite against the real site (analysis, compare, a tab tour, a wrong ticker). Allure report with a screenshot and a video of every test |
+| **End-to-end** (WebdriverIO + Appium XCUITest, TypeScript) | `e2e/ios/` at the repo root (web page objects shared with Android in `e2e/shared/`) | The app driven like a person on a simulator: a `mock` suite against a local copy of the web app (browsing, offline screen, watch → real notification in Notification Center → tap opens the company, Spanish, native accessibility at 44 pt and axe-core on the page) and a `live` suite against the real site (analysis, compare, a tab tour, a wrong ticker). Allure report with a screenshot and a video of every test |
 
-GitHub Actions (`.github/workflows/ios.yml`) generates the project, picks an available iPhone simulator on GitHub's macOS runner, builds, and runs the unit tests on every push; a second job builds the app for the simulator and runs the end-to-end suite (the report is the **appium-allure-report** artifact). Locally, with Xcode: build with `xcodebuild build -scheme StockValue -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath build CODE_SIGNING_ALLOWED=NO`, then `cd e2e && npm ci && npm test`.
+GitHub Actions (`.github/workflows/ios.yml` at the repo root; it runs when `ios/`, `e2e/ios/` or `e2e/shared/` change) generates the project, picks an available iPhone simulator on GitHub's macOS runner, builds, and runs the unit tests on every push; a second job builds the app for the simulator and runs the end-to-end suite (the report is the **appium-allure-report** artifact). Locally, with Xcode: build with `xcodebuild build -scheme StockValue -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath build CODE_SIGNING_ALLOWED=NO`, then `cd ../e2e/ios && npm ci && npm test`.
 
 ## Project structure
 

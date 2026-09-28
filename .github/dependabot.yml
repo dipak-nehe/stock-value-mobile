@@ -1,0 +1,13 @@
+# Weekly grouped update pull requests; CI runs the full build and tests on each.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /android
+    schedule: { interval: weekly, day: monday }
+    groups:
+      gradle-dependencies: { patterns: ["*"] }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    groups:
+      actions: { patterns: ["*"] }

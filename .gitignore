@@ -1,0 +1,9 @@
+# Both apps have their own .gitignore (android/, ios/); these cover the shared end-to-end folders and tools.
+node_modules
+allure-results/
+allure-report/
+e2e/*/logs/
+test-results/
+__pycache__/
+*.pyc
+.DS_Store

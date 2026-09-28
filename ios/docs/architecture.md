@@ -1,6 +1,6 @@
 # Architecture: 10-Year Stock Value Analysis for iOS
 
-How the iOS app is built, how its parts talk to each other and to the web app, and how it's tested and shipped. Written for engineers joining the project and for anyone reviewing it; the [README](../README.md) covers building and running. The [Android app](https://github.com/dipak-nehe/stock-value-android) follows the same design; section 9 lists where iOS differs.
+How the iOS app is built, how its parts talk to each other and to the web app, and how it's tested and shipped. Written for engineers joining the project and for anyone reviewing it; the [README](../README.md) covers building and running. The [Android app](../../android/) follows the same design; section 9 lists where iOS differs.
 
 **In one sentence:** a small SwiftUI app that shows the web app ([stock-value-analysis.vercel.app](https://stock-value-analysis.vercel.app)) in a WKWebView, and adds what a website can't do: a watchlist that checks SEC filings in the background and sends notifications.
 
@@ -212,7 +212,7 @@ sequenceDiagram
 |---|---|---|
 | **Unit** (XCTest, 22 tests) | `StockValueTests/` | The same cases as the Android unit tests: link rules, results-page detection, alert rules (baseline, once-only, oldest first, letters ignored), reading the API response, saving and capping the watchlist, the API version contract |
 | **Launch check** (CI) | `.github/workflows/ios.yml` | The built app installs and opens on the simulator; screenshots of the start page, KO's results (with the ☆) and Spanish are kept as an artifact |
-| **End-to-end** (WebdriverIO + Appium XCUITest) | `e2e/` | The Android repo's framework with the XCUITest driver; the web page objects are shared unchanged. Mock suite (browsing, offline, watch → Notification Center → tap, Spanish, accessibility) and live suite (analysis, compare, tab tour, wrong ticker). Screenshot and video per test in Allure |
+| **End-to-end** (WebdriverIO + Appium XCUITest) | `e2e/ios/` (web page objects in `e2e/shared/`) | The Android repo's framework with the XCUITest driver; the web page objects are shared unchanged. Mock suite (browsing, offline, watch → Notification Center → tap, Spanish, accessibility) and live suite (analysis, compare, tab tour, wrong ticker). Screenshot and video per test in Allure |
 
 ---
 

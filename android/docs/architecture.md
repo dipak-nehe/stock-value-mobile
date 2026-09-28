@@ -218,7 +218,7 @@ flowchart TB
 |---|---|---|
 | Unit (`app/src/test`) | JVM, seconds | Link rules, results-page detection, alert rules (baseline, once-only, ordering), JSON reading/saving, API version contract |
 | Instrumented (`app/src/androidTest`) | Emulator | The real screen against a local server: loading, user agent, in-app links and Back, browser intents, offline and retry, Watch button, Watchlist, the worker posting exactly the expected notifications, a notification opening the right page |
-| End-to-end (`e2e/`) | Emulator, driven like a user | See below |
+| End-to-end (`e2e/android/`, web page objects in `e2e/shared/`) | Emulator, driven like a user | See below |
 
 ### End-to-end framework
 

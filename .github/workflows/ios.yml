@@ -1,0 +1,178 @@
+name: ios
+
+# Runs only when the iOS app, its end-to-end tests or the shared test code change.
+on:
+  push:
+    paths:
+      - "ios/**"
+      - "e2e/ios/**"
+      - "e2e/shared/**"
+      - ".github/workflows/ios.yml"
+      - ".github/scripts/allure_counts.py"
+      - ".github/scripts/pick_simulator.py"
+  pull_request:
+    paths:
+      - "ios/**"
+      - "e2e/ios/**"
+      - "e2e/shared/**"
+      - ".github/workflows/ios.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Build and unit tests (iOS Simulator)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ios   # the Xcode project lives in ios/
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Show the Xcode and simulators available
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes | grep -i ios
+
+      - name: Generate the Xcode project (XcodeGen, from project.yml)
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Pick an iPhone simulator
+        id: sim
+        run: python3 "$GITHUB_WORKSPACE/.github/scripts/pick_simulator.py"
+
+      - name: Build and run the unit tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project StockValue.xcodeproj -scheme StockValue \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO | tee xcodebuild.log | grep -E "error:|warning: .*StockValue|Test Case|Executed|\*\* (TEST|BUILD)" || true
+          grep -q "\*\* TEST SUCCEEDED \*\*" xcodebuild.log
+
+      # Proof it runs: install the app on the simulator, open it, and screenshot the live site inside it.
+      - name: Launch the app and take screenshots
+        if: success()
+        run: |
+          UDID=${{ steps.sim.outputs.udid }}
+          APP=$(find ~/Library/Developer/Xcode/DerivedData -path "*Debug-iphonesimulator/StockValue.app" -maxdepth 6 | head -1)
+          echo "app: $APP"
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl install "$UDID" "$APP"
+          mkdir -p screenshots
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue
+          sleep 20
+          xcrun simctl io "$UDID" screenshot screenshots/1-start-page.png
+          xcrun simctl terminate "$UDID" com.dipaknehe.stockvalue
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -OpenURL "https://stock-value-analysis.vercel.app/?t=KO"
+          sleep 25
+          xcrun simctl io "$UDID" screenshot screenshots/2-ko-results.png
+          xcrun simctl terminate "$UDID" com.dipaknehe.stockvalue
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -AppleLanguages "(es)" -OpenURL "https://stock-value-analysis.vercel.app/?t=KO&lang=es"
+          sleep 25
+          xcrun simctl io "$UDID" screenshot screenshots/3-spanish.png
+
+      - name: Upload the screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: simulator-screenshots
+          path: ios/screenshots/
+          if-no-files-found: ignore
+
+      - name: Upload the test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: |
+            ios/TestResults.xcresult
+            ios/xcodebuild.log
+          if-no-files-found: ignore
+
+  # The app driven like a person would, on a simulator: WebdriverIO + Appium (XCUITest), against a local mock of the
+  # web app and against the live site. Allure report with a screenshot and a video of every test.
+  e2e:
+    name: Appium end-to-end (WebdriverIO)
+    runs-on: macos-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: e2e/ios/package-lock.json
+
+      - name: Generate the Xcode project (XcodeGen, from project.yml)
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Pick an iPhone simulator
+        id: sim
+        run: python3 "$GITHUB_WORKSPACE/.github/scripts/pick_simulator.py"
+
+      # -derivedDataPath build: the app lands where e2e/ios/support/capabilities.ts looks for it (ios/build).
+      - name: Build the app for the simulator
+        working-directory: ios
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project StockValue.xcodeproj -scheme StockValue \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO | tee xcodebuild-app.log | grep -E "error:|\*\* BUILD" || true
+          test -d build/Build/Products/Debug-iphonesimulator/StockValue.app
+
+      - name: Install WebdriverIO, Appium and the XCUITest driver
+        working-directory: e2e/ios
+        run: |
+          npm ci
+          npm run typecheck
+          npm run appium:drivers
+
+      - name: Boot the simulator
+        run: |
+          xcrun simctl boot "${{ steps.sim.outputs.udid }}" 2>/dev/null || true
+          xcrun simctl bootstatus "${{ steps.sim.outputs.udid }}" -b
+
+      - name: Run the mock and live suites
+        working-directory: e2e/ios
+        env:
+          IOS_UDID: ${{ steps.sim.outputs.udid }}
+          IOS_DEVICE_NAME: ${{ steps.sim.outputs.name }}
+          IOS_VERSION: ${{ steps.sim.outputs.version }}
+        run: npm test
+
+      - name: Build the Allure report
+        if: always()
+        working-directory: e2e/ios
+        run: npm run report
+
+      - name: Count the results
+        if: always()
+        run: python3 .github/scripts/allure_counts.py e2e/ios/allure-results
+
+      - name: Upload the Allure report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: appium-allure-report
+          path: e2e/ios/allure-report/
+          if-no-files-found: ignore
+
+      - name: Upload the Appium and WebdriverIO logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: appium-logs
+          path: |
+            e2e/ios/logs/
+            ios/xcodebuild-app.log
+          if-no-files-found: ignore
