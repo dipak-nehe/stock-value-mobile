@@ -4,7 +4,7 @@ import Notifications from '../../screens/Notifications.js';
 import WatchlistScreen from '../../screens/WatchlistScreen.js';
 import MockPage from '../../../shared/webpages/MockPage.js';
 import { MockSite, type Report } from '../../../shared/mockSite.js';
-import { activateApp, inWebView, launchApp, resetApp } from '../../support/app.js';
+import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
 const Q2: Report = { form: '10-Q', date: '2026-04-28', accession: '0000021344-26-000010', url: 'https://www.sec.gov/q2.htm' };
@@ -85,7 +85,8 @@ describe('Filing alerts', () => {
     });
 
     it('can stop watching from the Watchlist', async () => {
-        await activateApp(); // in front, even if an earlier step left Notification Center open
+        // Open KO's page first, so this test doesn't depend on the notification tap before it.
+        await launchApp({ site: site.url, open: `${site.url}?t=KO` });
         await MainScreen.openWatchlist();
         await WatchlistScreen.removeButton('KO').click();
         await expect(WatchlistScreen.emptyMessage).toBeDisplayed();

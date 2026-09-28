@@ -57,8 +57,20 @@ class Notifications {
      * showing, tap the card's centre by its coordinates.
      */
     async tap(text: string): Promise<void> {
-        const card = this.notification(text);
-        const { x, y, width, height } = await card.getLocation().then(async (at) => ({ ...at, ...(await card.getSize()) }));
+        // Several elements contain the text: a container spanning several cards (its centre can sit on another app's
+        // notification) and the card itself. Use the smallest one, which is the card.
+        let card = this.notification(text);
+        let rect = { x: 0, y: 0, width: 0, height: 0 };
+        let smallest = Infinity;
+        for (const el of await $$(byLabelContains(text))) {
+            const r = await driver.getElementRect(await el.elementId);
+            if (r.height > 20 && r.width * r.height < smallest) {
+                smallest = r.width * r.height;
+                rect = r;
+                card = el as unknown as typeof card;
+            }
+        }
+        const { x, y, width, height } = rect;
         const cx = Math.round(x + width / 2), cy = Math.round(y + height / 2);
         const opened = () => card.isDisplayed().then((shown) => !shown, () => true);
         // iOS 26 doesn't always open the app for a synthesized tap on a Notification Center card, so try, in turn:
