@@ -27,8 +27,18 @@ export class WebAnalysisPage {
         return $(`aria/${say(this.lang, 'Analyze', 'Analizar')}`);
     }
 
+    /** The page has loaded and its scripts have run (module scripts run before the page counts as complete). */
+    async waitUntilReady(timeout = 60_000): Promise<void> {
+        await browser.waitUntil(() => browser.execute(() => document.readyState === 'complete'), {
+            timeout,
+            timeoutMsg: 'the web page never finished loading',
+        });
+    }
+
+    /** Types a ticker and presses Analyze, which the site enables only once there's a ticker in the box. */
     async search(ticker: string): Promise<void> {
         await this.searchBox.setValue(ticker);
+        await this.analyzeButton.waitForEnabled({ timeout: 30_000 });
         await this.analyzeButton.click();
     }
 

@@ -17,7 +17,8 @@ describe('Live site smoke test', () => {
         // One switch into the page for the whole web flow.
         await inWebView(async () => {
             await expect(WebAnalysis.siteTitle).toHaveText(expect.stringContaining('10-Year Stock Value Analysis'), { wait: 60_000 });
-            await expect(WebAnalysis.analyzeButton).toBeEnabled({ wait: 30_000 }); // the page's script has loaded
+            await WebAnalysis.waitUntilReady();
+            await expect(WebAnalysis.analyzeButton).toBeDisabled(); // nothing typed yet: the site won't search for nothing
             await WebAnalysis.search('KO');
             await expect(WebAnalysis.companyName).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
             await expect(WebAnalysis.glance).toBeDisplayed();

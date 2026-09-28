@@ -13,7 +13,7 @@ describe('Live site accessibility', () => {
 
     it('the start page passes axe-core inside the app', async () => {
         const violations = await inWebView(async () => {
-            await expect(WebAnalysis.analyzeButton).toBeEnabled({ wait: 60_000 });
+            await WebAnalysis.waitUntilReady(); // (Analyze stays disabled until a ticker is typed)
             return checkWebPage('live start page');
         });
         expect(violations).toEqual([]);
