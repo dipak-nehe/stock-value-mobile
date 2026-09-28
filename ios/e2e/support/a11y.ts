@@ -31,14 +31,16 @@ export async function checkNativeScreen(screenName: string): Promise<NativeIssue
     const tree = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' }).parse(xml) as UiNode;
     const issues: NativeIssue[] = [];
 
-    const visit = (n: UiNode, type = '') => {
+    const visit = (n: UiNode, type = '', inBar = false) => {
         if (type === 'XCUIElementTypeWebView') return; // web content: axe-core's job
         if (TAPPABLE.has(type) && attr(n, 'visible') === 'true' && attr(n, 'enabled') === 'true') {
             const name = `${type.replace('XCUIElementType', '')} ${attr(n, 'name') || attr(n, 'label') || '(unnamed)'}`;
             if (!attr(n, 'label').trim()) issues.push({ rule: 'missing-label', element: name, detail: 'no accessibility label' });
             const w = Number(attr(n, 'width'));
             const h = Number(attr(n, 'height'));
-            if (w < MIN_TOUCH_PT - 0.5 || h < MIN_TOUCH_PT - 0.5) {
+            // Navigation-bar buttons: iOS draws them as 36 pt capsules but makes the whole bar height tappable
+            // around them, so only their width is ours to check.
+            if (w < MIN_TOUCH_PT - 0.5 || (!inBar && h < MIN_TOUCH_PT - 0.5)) {
                 issues.push({ rule: 'small-touch-target', element: name, detail: `${w}×${h}pt` });
             }
         }
@@ -46,7 +48,7 @@ export async function checkNativeScreen(screenName: string): Promise<NativeIssue
         for (const [key, value] of Object.entries(n)) {
             if (key.startsWith('@_') || key === '#text') continue;
             for (const child of (Array.isArray(value) ? value : [value]).filter((v) => typeof v === 'object' && v !== null)) {
-                visit(child as UiNode, key);
+                visit(child as UiNode, key, inBar || type === 'XCUIElementTypeNavigationBar');
             }
         }
     };
@@ -67,6 +69,8 @@ export interface AxeViolation {
 
 /** Runs axe-core (WCAG 2.0/2.1 A and AA) on the page in the current WEBVIEW context. */
 export async function checkWebPage(pageName: string): Promise<string[]> {
+    // The iOS web context starts with an async-script timeout of almost nothing; axe needs a few seconds.
+    await browser.setTimeout({ script: 60_000 });
     await browser.execute(AXE_SOURCE);
     const violations = (await browser.executeAsync((done: (v: unknown) => void) => {
         // @ts-expect-error axe is injected into the page above

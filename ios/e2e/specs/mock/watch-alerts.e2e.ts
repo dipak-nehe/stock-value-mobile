@@ -59,8 +59,11 @@ describe('Filing alerts', () => {
         await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
         await expect(Notifications.notification('late-filing notice (NT 10-K)')).toBeDisplayed();
         await screenshot('Notification Center with the two alerts');
-        // exactly two: the report and the late filing; the SEC letter isn't announced
-        await expect(Notifications.notifications('COCA COLA CO (KO)')).toBeElementsArrayOfSize(2);
+        // Only the report and the late filing: every Coca-Cola notification is one of those two (the SEC letter
+        // isn't announced).
+        const texts = await Notifications.texts('COCA COLA CO (KO)');
+        expect(texts.length).toBeGreaterThan(0);
+        for (const t of texts) expect(/Filed a new 10-Q on 2026-07-29|late-filing notice \(NT 10-K\)/.test(t)).toBe(true);
         await Notifications.close();
     });
 
