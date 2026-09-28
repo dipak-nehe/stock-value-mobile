@@ -1,4 +1,4 @@
-import { APP, BUNDLE_ID } from './capabilities.js';
+import { APP, BUNDLE_ID, WEB_INSPECTOR_IDS } from './capabilities.js';
 import type { Lang } from '../screens/lang.js';
 
 /**
@@ -64,7 +64,7 @@ async function switchToWebView(): Promise<void> {
             async () => {
                 const contexts = (await driver.execute('mobile: getContexts', { waitForWebviewMs: 0 })) as Context[];
                 const pages = contexts.filter(
-                    (c) => c.id.startsWith('WEBVIEW') && (!c.bundleId || c.bundleId === BUNDLE_ID) && c.url && c.url !== 'about:blank',
+                    (c) => c.id.startsWith('WEBVIEW') && (!c.bundleId || WEB_INSPECTOR_IDS.includes(c.bundleId)) && c.url && c.url !== 'about:blank',
                 );
                 const ours = pages[pages.length - 1];
                 if (!ours) {

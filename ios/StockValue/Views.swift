@@ -50,7 +50,7 @@ struct RootView: View {
                 // and the Watchlist button.
                 ToolbarItem(placement: .topBarLeading) {
                     if web.canGoBack {
-                        Button { web.goBack() } label: { Image(systemName: "chevron.backward") }
+                        Button { web.goBack() } label: { Image(systemName: "chevron.backward").frame(minWidth: 44, minHeight: 44) }
                             .accessibilityLabel(Text("back"))
                             .accessibilityIdentifier("back-button")
                     }
@@ -62,11 +62,12 @@ struct RootView: View {
                             show(model.toggleWatch())
                         } label: {
                             Image(systemName: watching ? "star.fill" : "star")
+                                .frame(minWidth: 44, minHeight: 44) // Apple's minimum touch target
                         }
                         .accessibilityLabel(String(format: String(localized: watching ? "action_watching" : "action_watch"), ticker))
                         .accessibilityIdentifier(watching ? "watching-button" : "watch-button")
                     }
-                    Button { showWatchlist = true } label: { Image(systemName: "list.bullet") }
+                    Button { showWatchlist = true } label: { Image(systemName: "list.bullet").frame(minWidth: 44, minHeight: 44) }
                         .accessibilityLabel(Text("watchlist"))
                         .accessibilityIdentifier("watchlist-button")
                 }
@@ -151,9 +152,14 @@ struct WatchlistView: View {
                         }
                         .accessibilityIdentifier("row-\(w.ticker)")
                         Spacer()
-                        Button { model.remove(w.ticker) } label: { Image(systemName: "xmark") }
+                        // The 44 pt frame goes on the label, inside the button: framing the button from outside
+                        // leaves only the small icon tappable. contentShape makes the empty area tappable too.
+                        Button { model.remove(w.ticker) } label: {
+                            Image(systemName: "xmark")
+                                .frame(minWidth: 44, minHeight: 44)
+                                .contentShape(Rectangle())
+                        }
                             .buttonStyle(.borderless)
-                            .frame(minWidth: 44, minHeight: 44)
                             .accessibilityLabel(String(format: String(localized: "remove_ticker"), w.ticker))
                             .accessibilityIdentifier("remove-\(w.ticker)")
                     }

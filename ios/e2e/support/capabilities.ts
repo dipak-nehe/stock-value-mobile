@@ -3,6 +3,12 @@ import { fileURLToPath } from 'node:url';
 
 export const BUNDLE_ID = 'com.dipaknehe.stockvalue';
 
+/**
+ * How the app names itself to Web Inspector. iOS 26 simulators report the app's pages under its process
+ * ("process-StockValue") rather than its bundle id, and Appium only offers pages from apps it can match.
+ */
+export const WEB_INSPECTOR_IDS = [BUNDLE_ID, 'process-StockValue'];
+
 const here = fileURLToPath(new URL('.', import.meta.url));
 
 /**
@@ -39,5 +45,6 @@ export const iosCapabilities = {
     'appium:connectHardwareKeyboard': false,
     // Hybrid testing: the page inside the app's WKWebView (inspectable in debug builds) is a WEBVIEW context.
     'appium:webviewConnectTimeout': 30_000,
+    'appium:additionalWebviewBundleIds': WEB_INSPECTOR_IDS,
     'appium:fullContextList': true,
 } as WebdriverIO.Capabilities;
