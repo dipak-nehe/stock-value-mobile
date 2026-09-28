@@ -17,10 +17,17 @@ on:
       - "e2e/shared/**"
       - ".github/workflows/ios.yml"
   workflow_dispatch:
+    inputs:
+      spec:
+        description: "Run only this end-to-end spec file (e.g. ./specs/mock/watch-alerts.e2e.ts); empty = everything"
+        required: false
+        default: ""
 
 jobs:
   test:
     name: Build and unit tests (iOS Simulator)
+    # Skipped when a single end-to-end spec was asked for (a quick ~10-minute check of one file).
+    if: github.event_name != 'workflow_dispatch' || inputs.spec == ''
     runs-on: macos-latest
     timeout-minutes: 30
     defaults:
@@ -142,13 +149,15 @@ jobs:
           xcrun simctl boot "${{ steps.sim.outputs.udid }}" 2>/dev/null || true
           xcrun simctl bootstatus "${{ steps.sim.outputs.udid }}" -b
 
-      - name: Run the mock and live suites
+      - name: Run the mock and live suites (or the one spec asked for)
         working-directory: e2e/ios
         env:
           IOS_UDID: ${{ steps.sim.outputs.udid }}
           IOS_DEVICE_NAME: ${{ steps.sim.outputs.name }}
           IOS_VERSION: ${{ steps.sim.outputs.version }}
-        run: npm test
+          SPEC: ${{ inputs.spec }}
+        run: |
+          if [ -n "$SPEC" ]; then npx wdio run wdio.conf.ts --spec "$SPEC"; else npm test; fi
 
       - name: Build the Allure report
         if: always()
@@ -165,6 +174,20 @@ jobs:
         with:
           name: appium-allure-report
           path: e2e/ios/allure-report/
+          if-no-files-found: ignore
+
+      # The same evidence as the report, as small separate files (screenshots, notes, UI trees; no videos), so a
+      # failure can be read without opening the ~70 MB single-file report.
+      - name: Upload the report's screenshots and notes
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-evidence
+          path: |
+            e2e/ios/allure-results/*.png
+            e2e/ios/allure-results/*.txt
+            e2e/ios/allure-results/*.xml
+            e2e/ios/allure-results/*-result.json
           if-no-files-found: ignore
 
       - name: Upload the Appium and WebdriverIO logs

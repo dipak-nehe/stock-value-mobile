@@ -1,5 +1,6 @@
 import allureReporter from '@wdio/allure-reporter';
 import { activateApp, byLabelContains } from '../support/app.js';
+import { screenshot } from '../support/report.js';
 
 /**
  * iOS Notification Center. It belongs to the system (SpringBoard), not the app: while it's open, element lookups are
@@ -72,23 +73,33 @@ class Notifications {
         }
         const { x, y, width, height } = rect;
         const cx = Math.round(x + width / 2), cy = Math.round(y + height / 2);
+        allureReporter.addAttachment('notification card', JSON.stringify(rect), 'text/plain');
         const opened = () => card.isDisplayed().then((shown) => !shown, () => true);
-        // iOS 26 doesn't always open the app for a synthesized tap on a Notification Center card, so try, in turn:
-        // an element tap, a coordinate tap, then a swipe right across the card (which opens a notification there).
+        // Don't let Appium wait for the screen to settle after each gesture: while the app opens, the screen keeps
+        // animating, and each wait can take a minute (a run timed out at 4 minutes in here).
+        await driver.updateSettings({ waitForIdleTimeout: 0, animationCoolOffTimeout: 0 });
+        // A synthesized tap on a Notification Center card didn't open the app on iOS 26; a swipe right did (it opened
+        // the card it was on). So swipe first, then fall back to taps.
         const attempts: [string, () => Promise<unknown>][] = [
-            ['element tap', () => card.click()],
-            ['coordinate tap', () => driver.execute('mobile: tap', { x: cx, y: cy })],
             ['swipe right', () => driver.execute('mobile: dragFromToForDuration', { fromX: x + 20, fromY: cy, toX: x + width - 10, toY: cy, duration: 0.3 })],
+            ['coordinate tap', () => driver.execute('mobile: tap', { x: cx, y: cy })],
+            ['element tap', () => card.click()],
         ];
         let worked = '';
-        for (const [name, attempt] of attempts) {
-            await attempt().catch(() => undefined);
-            if (await browser.waitUntil(opened, { timeout: 5_000 }).catch(() => false)) {
-                worked = name;
-                break;
+        try {
+            for (const [name, attempt] of attempts) {
+                await attempt().catch(() => undefined);
+                await browser.pause(1_500);
+                await screenshot(`after ${name}`);
+                if (await browser.waitUntil(opened, { timeout: 5_000 }).catch(() => false)) {
+                    worked = name;
+                    break;
+                }
             }
+        } finally {
+            await driver.updateSettings({ waitForIdleTimeout: 10, animationCoolOffTimeout: 2 });
         }
-        allureReporter.addAttachment('how the notification was opened', worked || 'none of: element tap, coordinate tap, swipe right', 'text/plain');
+        allureReporter.addAttachment('how the notification was opened', worked || 'none of: swipe right, coordinate tap, element tap', 'text/plain');
         await driver.updateSettings({ defaultActiveApplication: 'auto' });
         if (!worked) throw new Error('Notification Center stayed open after tapping, tapping by position and swiping the notification');
         await browser.pause(1_000);
