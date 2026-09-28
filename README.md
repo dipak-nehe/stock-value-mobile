@@ -33,6 +33,8 @@ Architecture with diagrams: [android/docs/architecture.md](android/docs/architec
 | Instrumented | 11 Espresso tests | (launch check with screenshots) |
 | End-to-end | 34 Appium tests (UiAutomator2) | 34 Appium tests (XCUITest) |
 
+**[Test plan](docs/test-plan.md)** (scope, layers, devices, traceability, exit criteria, current status) and **[every end-to-end test](docs/e2e-tests.md)**, side by side for both platforms.
+
 The end-to-end suites run against a local mock of the web app (exact checks: browsing, offline screen, watch → real notification → tap opens the company, Spanish, accessibility) and against the live site (analysis, compare, a tab tour, a wrong ticker). Every test gets a screenshot and a video in its Allure report.
 
 ## CI
