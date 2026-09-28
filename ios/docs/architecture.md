@@ -37,7 +37,7 @@ flowchart LR
 
 - **No backend of its own:** the app reuses the web app's pages and its cached JSON API. SEC is only contacted by the web app's function.
 - **No accounts, no server-side watchlist:** the watchlist lives on the device.
-- **One API contract:** `/api/financials?ticker=X&v=5`. `StatusAPI.apiVersion` must equal `API_VERSION` in the web app's `public/js/page.js` (a unit test pins it).
+- **One API contract:** `/api/financials?ticker=X&v=6`. `StatusAPI.apiVersion` must equal `API_VERSION` in the web app's `public/js/page.js` (a unit test pins it).
 
 ---
 
@@ -159,7 +159,7 @@ sequenceDiagram
         F->>St: update(state)
         F->>N: post(alert)
     end
-    Note over R: first check = baseline only · new 10-K/10-Q/20-F/40-F → "new report" · restatement, auditor change, late filing, amended 10-K → warning · once each, oldest first · SEC letters recorded, not announced
+    Note over R: first check = baseline only · new 10-K/10-Q/20-F/40-F → "new report" · restatement, auditor change, late filing, amended 10-K, exchange notice, cyber incident, write-down, bankruptcy → warning · once each, oldest first · acquisitions and SEC letters recorded, not announced
     U->>D: tap notification
     D->>M: open(url) → RootView loads /?t=KO (#history for warnings)
 ```
@@ -210,9 +210,9 @@ sequenceDiagram
 
 | Layer | Where | Proves |
 |---|---|---|
-| **Unit** (XCTest, 21 tests) | `StockValueTests/` | The same cases as the Android unit tests: link rules, results-page detection, alert rules (baseline, once-only, oldest first, letters ignored), reading the API response, saving and capping the watchlist, the API version contract |
+| **Unit** (XCTest, 22 tests) | `StockValueTests/` | The same cases as the Android unit tests: link rules, results-page detection, alert rules (baseline, once-only, oldest first, letters ignored), reading the API response, saving and capping the watchlist, the API version contract |
 | **Launch check** (CI) | `.github/workflows/ios.yml` | The built app installs and opens on the simulator; screenshots of the start page, KO's results (with the ☆) and Spanish are kept as an artifact |
-| **End-to-end** | not built yet | Planned: the Android repo's WebdriverIO + Appium framework with the XCUITest driver, reusing its web page objects |
+| **End-to-end** (WebdriverIO + Appium XCUITest) | `e2e/` | The Android repo's framework with the XCUITest driver; the web page objects are shared unchanged. Mock suite (browsing, offline, watch → Notification Center → tap, Spanish, accessibility) and live suite (analysis, compare, tab tour, wrong ticker). Screenshot and video per test in Allure |
 
 ---
 
@@ -226,6 +226,8 @@ flowchart LR
     test --> shots["install + launch the app<br/>3 screenshots"]
     test --> res["upload test results<br/>(.xcresult + log)"]
     shots --> art["simulator-screenshots artifact"]
+    push --> e2e["second job: build for the simulator,<br/>WebdriverIO + Appium (XCUITest)"]
+    e2e --> rep["appium-allure-report artifact<br/>(screenshot + video per test)"]
 ```
 
 The repository is public, so GitHub's macOS minutes are free (private repositories count them 10×).
@@ -243,12 +245,12 @@ The repository is public, so GitHub's macOS minutes are free (private repositori
 | Storage | SharedPreferences (JSON) | UserDefaults (Codable JSON) |
 | Debug overrides for tests | Intent extras | Launch arguments (`-SiteURL`, `-OpenURL`) |
 | Build | Gradle, locally or CI | XcodeGen + Xcode, CI only (no Xcode on the developer's Mac) |
-| Tests | 20 unit, 10 Espresso, 31 Appium | 21 unit, launch screenshots; Appium planned |
+| Tests | 21 unit, 12 Espresso, 34 Appium | 22 unit, launch screenshots, 34 Appium |
 
 ---
 
 ## 10. Limitations and next steps
 
-- **End-to-end tests** with Appium's XCUITest driver (next step).
+- **End-to-end tests** run on every push, but a full run takes 30–60 minutes of macOS time, and Notification Center steps depend on iOS's own UI, which changes between versions.
 - **Real devices, TestFlight, App Store:** need an Apple Developer account, signing, and a privacy policy; App Store review requires real native value (the watchlist and alerts).
 - **Punctual alerts** would need server-side push (APNs), which means a backend with stored watchlists: a deliberate trade-off against the no-accounts design.

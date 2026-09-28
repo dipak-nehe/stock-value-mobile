@@ -59,7 +59,8 @@ struct RootView: View {
                     if let ticker = model.currentTicker {
                         let watching = model.isWatching(ticker)
                         Button {
-                            show(model.toggleWatch())
+                            // `Task { … }` runs the async check (does SEC know this ticker?) without blocking the UI.
+                            Task { show(await model.toggleWatch()) }
                         } label: {
                             Image(systemName: watching ? "star.fill" : "star")
                                 .frame(minWidth: 44, minHeight: 44) // Apple's minimum touch target

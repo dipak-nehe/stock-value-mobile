@@ -41,22 +41,29 @@ final class AppModel: ObservableObject {
     }
 
     /// The ☆ button: watch the company on screen, or stop watching it. Returns a message to show.
-    func toggleWatch() -> String? {
+    /// Watching first checks SEC knows the company: after a wrong ticker the page's address keeps it (?t=ZZZZQ), so
+    /// the star shows there too. Offline counts as "known"; the next check decides (and drops unknown tickers).
+    func toggleWatch() async -> String? {
         guard let ticker = currentTicker else { return nil }
-        let message: String
         if store.contains(ticker) {
             store.remove(ticker)
-            message = String(format: String(localized: "unwatched"), ticker)
-        } else if !store.add(ticker) {
-            return String(format: String(localized: "watchlist_full"), WatchStore.max)
-        } else {
-            AlertNotifier.requestPermission()
-            message = String(format: String(localized: "watched"), ticker)
-            checkNow() // records today's filings as the starting point
+            FilingChecks.schedule()
+            refreshWatchlist()
+            return String(format: String(localized: "unwatched"), ticker)
         }
+        do {
+            _ = try await StatusAPI(siteURL: siteURL).fetch(ticker)
+        } catch StatusAPI.Failure.notFound {
+            return String(format: String(localized: "unknown_ticker"), ticker)
+        } catch {
+            // offline or a hiccup: watch it anyway
+        }
+        guard store.add(ticker) else { return String(format: String(localized: "watchlist_full"), WatchStore.max) }
+        AlertNotifier.requestPermission()
+        checkNow() // records today's filings as the starting point
         FilingChecks.schedule()
         refreshWatchlist()
-        return message
+        return String(format: String(localized: "watched"), ticker)
     }
 
     func remove(_ ticker: String) {

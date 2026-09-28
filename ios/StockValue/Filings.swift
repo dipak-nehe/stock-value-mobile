@@ -65,9 +65,14 @@ enum Alert: Equatable {
 
 /// Decides which notifications a check produces.
 enum AlertRules {
-    /// Warnings worth a notification: restatement warnings, auditor changes, late-filing notices, amended annual reports.
+    /// Warnings worth a notification: restatement warnings, auditor changes, late-filing notices, amended annual
+    /// reports, and the rarer serious 8-K events (bankruptcy, stock-exchange notices, cybersecurity incidents, large
+    /// write-downs). Acquisitions and SEC letters are recorded but never announced.
     /// TO ALERT ON MORE KINDS: add the type here, its text in AlertNotifier.warningText and Localizable.strings.
-    static let serious: Set<String> = ["non_reliance", "auditor_change", "late_filing", "amendment"]
+    static let serious: Set<String> = [
+        "non_reliance", "auditor_change", "late_filing", "amendment",
+        "bankruptcy", "delisting_notice", "cyber_incident", "impairment",
+    ]
 
     /// The updated watch state and the alerts to post.
     static func check(before: Watched, now: CompanyStatus, checkedAt: Date) -> (Watched, [Alert]) {

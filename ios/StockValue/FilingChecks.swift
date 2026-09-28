@@ -49,7 +49,8 @@ enum FilingChecks {
                 store.update(updated)
                 for alert in alerts { await notifier.post(alert, siteURL: siteURL) }
             } catch StatusAPI.Failure.notFound {
-                continue // unknown ticker: skip it, keep checking the others
+                store.remove(watched.ticker) // SEC doesn't know it (e.g. added offline from a wrong ticker): drop it
+                continue
             } catch {
                 failed = true // network problem: the next check tries again (nothing is announced twice)
             }

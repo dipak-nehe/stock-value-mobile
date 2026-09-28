@@ -1,5 +1,9 @@
 import { say, type Lang } from '../screens/lang.js';
 
+/** The results page's tabs, in order. */
+export const TABS = ['overview', 'flags', 'history', 'value', 'charts', 'data'] as const;
+export type Tab = (typeof TABS)[number];
+
 /**
  * The live web app's start and results page, inside the app's WKWebView. Use inside `inWebView(...)`.
  *
@@ -37,13 +41,56 @@ export class WebAnalysisPage {
     }
 
     /** #id: a tab's name ends with its badge count ("Red flags 2"). */
-    tab(name: 'overview' | 'flags' | 'history' | 'value' | 'charts' | 'data') {
+    tab(name: Tab) {
         return $(`#tab-${name}`);
     }
 
     /** #id: the link text is hard-coded copy with an arrow. */
     get compareLink() {
         return $('#compareLink');
+    }
+
+    /** #id: a tab's panel (panel-<tab>); its accessible name repeats the tab's, badge count included. */
+    panel(name: Tab) {
+        return $(`#panel-${name}`);
+    }
+
+    get trendTiles() {
+        return $('[data-testid="trend-tiles"]');
+    }
+
+    get flags() {
+        return $('[data-testid="flags"]');
+    }
+
+    get historyTiles() {
+        return $$('[data-testid="history-tiles"] [data-testid="tile"]');
+    }
+
+    get grahamScore() {
+        return $('[data-testid="graham-score"]');
+    }
+
+    chart(id: 'cRevenue' | 'cEps' | 'cDps' | 'cPayout' | 'cBalance' | 'cDebt' | 'cCash' | 'cMargin') {
+        return $(`[data-testid="chart-${id}"]`);
+    }
+
+    /** #id: the data table has no name of its own (its scrollable region is named by the Data tab). */
+    get dataTable() {
+        return $('#table');
+    }
+
+    /** The error shown for a ticker the site can't find (role="alert"). */
+    get error() {
+        return $('[data-testid="error"]');
+    }
+
+    /** True when the element is inside the visible part of the page, where a person would actually see it. */
+    async isInViewport(element: ChainablePromiseElement): Promise<boolean> {
+        return browser.execute((el: HTMLElement) => {
+            const r = el.getBoundingClientRect();
+            return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight;
+        }, (await element) as unknown as HTMLElement);
     }
 }
 

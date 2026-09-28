@@ -41,6 +41,10 @@ struct AlertNotifier {
         case "non_reliance": return String(localized: "alert_non_reliance")
         case "auditor_change": return String(localized: "alert_auditor_change")
         case "amendment": return String(format: String(localized: "alert_amendment"), e.form)
+        case "bankruptcy": return String(localized: "alert_bankruptcy")
+        case "delisting_notice": return String(localized: "alert_delisting_notice")
+        case "cyber_incident": return String(localized: "alert_cyber_incident")
+        case "impairment": return String(localized: "alert_impairment")
         default: return e.form
         }
     }

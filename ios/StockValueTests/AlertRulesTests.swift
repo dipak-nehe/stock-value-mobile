@@ -73,6 +73,20 @@ final class AlertRulesTests: XCTestCase {
     }
 
     func testOnlyTheAgreedTypesCountAsSerious() {
-        XCTAssertEqual(AlertRules.serious, ["non_reliance", "auditor_change", "late_filing", "amendment"])
+        XCTAssertEqual(AlertRules.serious, [
+            "non_reliance", "auditor_change", "late_filing", "amendment",
+            "bankruptcy", "delisting_notice", "cyber_incident", "impairment",
+        ])
+    }
+
+    func testTheNewSeriousEightKEventsAreAnnouncedButAcquisitionsAreNot() {
+        let notice = FilingEvent(date: "2026-08-01", type: "delisting_notice", form: "8-K", url: "https://sec/301")
+        let writeDown = FilingEvent(date: "2026-08-02", type: "impairment", form: "8-K", url: "https://sec/206")
+        let hack = FilingEvent(date: "2026-08-03", type: "cyber_incident", form: "8-K", url: "https://sec/105")
+        let bankrupt = FilingEvent(date: "2026-08-04", type: "bankruptcy", form: "8-K", url: "https://sec/103")
+        let deal = FilingEvent(date: "2026-08-05", type: "acquisition", form: "8-K", url: "https://sec/201")
+        let (updated, alerts) = AlertRules.check(before: baselined(q3), now: status(q3, deal, bankrupt, hack, writeDown, notice), checkedAt: t2)
+        XCTAssertEqual(alerts, [notice, writeDown, hack, bankrupt].map { .warning(ticker: "KO", name: "COCA COLA CO", event: $0) }) // oldest first
+        XCTAssertTrue(updated.seenEvents.contains(deal.key)) // recorded, so never announced later either
     }
 }

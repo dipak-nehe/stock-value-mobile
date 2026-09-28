@@ -4,7 +4,7 @@ import Foundation
 /// app never talks to SEC directly. Only `latestReport` and `secHistory.events` are used.
 struct StatusAPI {
     /// Must match API_VERSION in the web app (public/js/page.js). JSONTests pins it.
-    static let apiVersion = 5
+    static let apiVersion = 6
 
     enum Failure: Error, Equatable {
         case notFound

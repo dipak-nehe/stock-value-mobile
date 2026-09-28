@@ -6,12 +6,13 @@
 "back" = "Atrás";
 "watchlist" = "Seguimiento";
 "check_now" = "Comprobar ahora";
-"watchlist_intro" = "Recibirás una notificación cuando una empresa presente un nuevo informe anual o trimestral, o un aviso grave: un aviso de reexpresión, un cambio de auditor, un aviso de presentación tardía o un informe anual modificado. iOS decide cuándo comprobar en segundo plano; tu lista se queda en este teléfono.";
+"watchlist_intro" = "Recibirás una notificación cuando una empresa presente un nuevo informe anual o trimestral, o un aviso grave: un aviso de reformulación, un cambio de auditor, un aviso de presentación tardía, un informe anual modificado, un aviso de la bolsa, un incidente de ciberseguridad, una gran depreciación o una quiebra. iOS decide cuándo comprobar en segundo plano; tu lista se queda en este teléfono.";
 "watchlist_empty" = "Aún no sigues ninguna empresa. Abre el análisis de una empresa y toca la estrella para seguirla.";
 "action_watch" = "Seguir las presentaciones de %@";
 "action_watching" = "Siguiendo %@ (toca para dejar de seguir)";
 "watched" = "Siguiendo %@. Recibirás una notificación cuando presente un nuevo informe o un aviso grave.";
 "unwatched" = "Has dejado de seguir %@";
+"unknown_ticker" = "%@ no figura en los registros de la SEC, así que no se puede seguir.";
 "watchlist_full" = "La lista está llena. Quita una empresa primero (límite: %d).";
 "latest_report" = "Último informe: %1$@ presentado el %2$@";
 "no_report" = "No se ha encontrado ningún informe anual o trimestral";
@@ -22,6 +23,10 @@
 "alert_title_warning" = "⚠ %1$@ (%2$@)";
 "alert_new_report" = "Ha presentado un nuevo %1$@ el %2$@. Toca para ver el análisis actualizado.";
 "alert_late_filing" = "Ha presentado un aviso de presentación tardía (%@): no pudo presentar un informe a tiempo.";
-"alert_non_reliance" = "Ha advertido de que no se puede confiar en estados financieros anteriores (una reexpresión).";
+"alert_non_reliance" = "Ha indicado que ya no se debe confiar en estados financieros anteriores (un aviso de reformulación).";
 "alert_auditor_change" = "Ha cambiado de auditor independiente.";
 "alert_amendment" = "Ha modificado su informe anual (%@).";
+"alert_bankruptcy" = "Ha comunicado una quiebra o intervención judicial.";
+"alert_delisting_notice" = "Ha recibido un aviso de su bolsa: exclusión de cotización, o una norma de cotización incumplida.";
+"alert_cyber_incident" = "Ha comunicado un incidente de ciberseguridad importante.";
+"alert_impairment" = "Ha comunicado una gran depreciación de activos (un deterioro importante).";
