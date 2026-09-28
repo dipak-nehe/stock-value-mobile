@@ -65,6 +65,10 @@ class AlertNotifier(private val context: Context, private val siteUrl: String) {
         "non_reliance" -> context.getString(R.string.alert_non_reliance)
         "auditor_change" -> context.getString(R.string.alert_auditor_change)
         "amendment" -> context.getString(R.string.alert_amendment, e.form)
+        "bankruptcy" -> context.getString(R.string.alert_bankruptcy)
+        "delisting_notice" -> context.getString(R.string.alert_delisting_notice)
+        "cyber_incident" -> context.getString(R.string.alert_cyber_incident)
+        "impairment" -> context.getString(R.string.alert_impairment)
         else -> e.form
     }
 

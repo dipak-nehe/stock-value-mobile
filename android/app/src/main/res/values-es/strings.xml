@@ -8,10 +8,11 @@
     <string name="action_watch">Seguir las presentaciones de %1$s</string>
     <string name="action_watching">Siguiendo %1$s (toca para dejar de seguir)</string>
     <string name="watched">Siguiendo %1$s. Recibirás una notificación cuando presente un nuevo informe o un aviso grave.</string>
+    <string name="unknown_ticker">%1$s no figura en los registros de la SEC, así que no se puede seguir.</string>
     <string name="unwatched">Has dejado de seguir %1$s</string>
     <string name="watchlist_full">La lista está llena. Quita una empresa primero (límite: %1$d).</string>
     <string name="watchlist">Seguimiento</string>
-    <string name="watchlist_intro">Recibirás una notificación cuando una empresa presente un nuevo informe anual o trimestral, o un aviso grave: un aviso de reexpresión, un cambio de auditor, un aviso de presentación tardía o un informe anual modificado. Las empresas se comprueban unas dos veces al día; tu lista se queda en este teléfono.</string>
+    <string name="watchlist_intro">Recibirás una notificación cuando una empresa presente un nuevo informe anual o trimestral, o un aviso grave: un aviso de reformulación, un cambio de auditor, un aviso de presentación tardía, un informe anual modificado, un aviso de la bolsa, un incidente de ciberseguridad, una gran depreciación o una quiebra. Las empresas se comprueban unas dos veces al día; tu lista se queda en este teléfono.</string>
     <string name="watchlist_empty">Aún no sigues ninguna empresa. Abre el análisis de una empresa y toca la estrella para seguirla.</string>
     <string name="check_now">Comprobar ahora</string>
     <string name="checking">Comprobando…</string>
@@ -26,7 +27,11 @@
     <string name="channel_alerts_description">Nuevos informes anuales o trimestrales y avisos graves de la SEC de las empresas que sigues</string>
     <string name="alert_new_report">Ha presentado un nuevo %1$s el %2$s. Toca para ver el análisis actualizado.</string>
     <string name="alert_late_filing">Ha presentado un aviso de presentación tardía (%1$s): no pudo presentar un informe a tiempo.</string>
-    <string name="alert_non_reliance">Ha advertido de que no se puede confiar en estados financieros anteriores (una reexpresión).</string>
+    <string name="alert_non_reliance">Ha indicado que ya no se debe confiar en estados financieros anteriores (un aviso de reformulación).</string>
     <string name="alert_auditor_change">Ha cambiado de auditor independiente.</string>
     <string name="alert_amendment">Ha modificado su informe anual (%1$s).</string>
+    <string name="alert_bankruptcy">Ha comunicado una quiebra o intervención judicial.</string>
+    <string name="alert_delisting_notice">Ha recibido un aviso de su bolsa: exclusión de cotización, o una norma de cotización incumplida.</string>
+    <string name="alert_cyber_incident">Ha comunicado un incidente de ciberseguridad importante.</string>
+    <string name="alert_impairment">Ha comunicado una gran depreciación de activos (un deterioro importante).</string>
 </resources>

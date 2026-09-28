@@ -50,11 +50,15 @@ object AlertRules {
      *
      * TO ALERT ON MORE (OR FEWER) KINDS OF FILINGS: edit this set. The possible types come from the web app's
      * backend (_classify_filing in backend/stock_data.py): non_reliance, auditor_change, late_filing, amendment,
-     * sec_letter, company_response. A new type also needs its notification text: a case in
+     * bankruptcy, delisting_notice, cyber_incident, impairment, acquisition, sec_letter, company_response.
+     * Acquisitions and SEC letters are routine, so they're recorded but never announced. A new type also needs its notification text: a case in
      * AlertNotifier.warningText and strings in res/values/strings.xml and res/values-es/strings.xml.
      * Then update AlertRulesTest ("onlyTheAgreedTypesCountAsSerious").
      */
-    val SERIOUS = setOf("non_reliance", "auditor_change", "late_filing", "amendment")
+    val SERIOUS = setOf(
+        "non_reliance", "auditor_change", "late_filing", "amendment",
+        "bankruptcy", "delisting_notice", "cyber_incident", "impairment",
+    )
 
     /** Returns the updated watch state and the alerts to post (a Pair, written `a to b`). */
     fun check(before: Watched, now: CompanyStatus, checkedAt: Long): Pair<Watched, List<Alert>> {

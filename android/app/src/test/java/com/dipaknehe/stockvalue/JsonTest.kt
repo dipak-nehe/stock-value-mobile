@@ -50,6 +50,6 @@ class JsonTest {
     @Test
     fun theApiVersionMatchesTheWebApp() {
         // public/js/page.js API_VERSION; a mismatch would split the CDN cache and could miss new fields
-        assertEquals(5, StatusApi.API_VERSION)
+        assertEquals(6, StatusApi.API_VERSION)
     }
 }

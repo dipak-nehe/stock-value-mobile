@@ -181,7 +181,32 @@ class MainActivity : ComponentActivity() {
         if (store.contains(ticker)) {
             store.remove(ticker)
             Toast.makeText(this, getString(R.string.unwatched, ticker), Toast.LENGTH_SHORT).show()
-        } else if (!store.add(ticker)) {
+            FilingChecks.sync(this)
+            updateWatchAction()
+            return
+        }
+        // Check SEC knows the company first: after a wrong ticker the page's address keeps it (?t=ZZZZQ), so the
+        // star shows there too. Off the main thread (network); offline counts as "known" and the next check decides.
+        val site = siteUrl
+        Thread {
+            val known = try {
+                StatusApi(site).fetch(ticker)
+                true
+            } catch (_: StatusApi.NotFound) {
+                false
+            } catch (_: Exception) {
+                true
+            }
+            runOnUiThread {
+                if (known) startWatching(ticker)
+                else Toast.makeText(this, getString(R.string.unknown_ticker, ticker), Toast.LENGTH_LONG).show()
+            }
+        }.start()
+    }
+
+    /** Adds a company SEC knows to the watchlist, asks for notification permission, and records its starting point. */
+    private fun startWatching(ticker: String) {
+        if (!store.add(ticker)) {
             Toast.makeText(this, getString(R.string.watchlist_full, WatchStore.MAX), Toast.LENGTH_LONG).show()
             return
         } else {

@@ -35,7 +35,7 @@ flowchart LR
 
 - **No backend of its own.** The app reuses the web app: its pages for everything the user sees, and its cached JSON API for background checks. SEC is only contacted by the web app's function, and usually not even then, because results are stored in Redis and the CDN.
 - **No accounts, no server-side watchlist.** The watchlist lives on the phone.
-- **One API contract:** `/api/financials?ticker=X&v=5`. The app's `StatusApi.API_VERSION` must equal `API_VERSION` in the web app's `public/js/page.js` (a unit test pins it), so both share the CDN cache and the app always sees the fields it reads.
+- **One API contract:** `/api/financials?ticker=X&v=6`. The app's `StatusApi.API_VERSION` must equal `API_VERSION` in the web app's `public/js/page.js` (a unit test pins it), so both share the CDN cache and the app always sees the fields it reads.
 
 ---
 
@@ -152,7 +152,7 @@ sequenceDiagram
         Wk->>St: update(state)
         Wk->>N: post(alert) for each
     end
-    Note over R: first check = baseline only (never alert on old filings)<br/>new 10-K/10-Q/20-F/40-F → "new report"<br/>restatement, auditor change, late filing, amended 10-K → warning<br/>each filing announced once, oldest first · SEC letters recorded, not announced
+    Note over R: first check = baseline only (never alert on old filings)<br/>new 10-K/10-Q/20-F/40-F → "new report"<br/>restatement, auditor change, late filing, amended 10-K,<br/>exchange notice, cyber incident, write-down, bankruptcy → warning<br/>each filing announced once, oldest first · SEC letters and acquisitions recorded, not announced
     U->>N: tap notification
     N->>M: open /?t=KO (#history for warnings)
 ```
@@ -207,9 +207,9 @@ Also stored: the WebView's own data (the web app remembers the chosen language i
 
 ```mermaid
 flowchart TB
-    e2e["End-to-end: WebdriverIO + Appium (UiAutomator2)<br/>31 tests · native + WebView · mock and live site<br/>accessibility · Spanish · compare · Allure screenshots + video"]
-    inst["Instrumented: Espresso + Espresso-Web + WorkManager testing<br/>10 tests · MockWebServer"]
-    unit["JVM unit tests: 20 tests<br/>SitePolicy · SiteUrls · AlertRules · JSON · API version"]
+    e2e["End-to-end: WebdriverIO + Appium (UiAutomator2)<br/>34 tests · native + WebView · mock and live site<br/>accessibility · Spanish · compare · Allure screenshots + video"]
+    inst["Instrumented: Espresso + Espresso-Web + WorkManager testing<br/>12 tests · MockWebServer"]
+    unit["JVM unit tests: 21 tests<br/>SitePolicy · SiteUrls · AlertRules · JSON · API version"]
     lint["Android Lint (warnings = errors)"]
     e2e --- inst --- unit --- lint
 ```

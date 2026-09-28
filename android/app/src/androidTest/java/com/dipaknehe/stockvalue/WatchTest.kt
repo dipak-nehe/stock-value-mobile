@@ -50,6 +50,7 @@ class WatchTest {
     private val server = MockWebServer()
 
     @Volatile private var apiJson = apiResponse(report = Q2)
+    private val paths = java.util.concurrent.CopyOnWriteArrayList<String>() // every path the app requested
 
     @Before
     fun setUp() {
@@ -58,6 +59,7 @@ class WatchTest {
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 val path = request.path.orEmpty()
+                paths += path
                 return when {
                     path.startsWith("/api/financials?ticker=KO") -> json(apiJson)
                     path.startsWith("/api/financials") -> MockResponse().setResponseCode(404).setBody("{}")
@@ -121,11 +123,32 @@ class WatchTest {
     }
 
     @Test
+    fun aTickerSecDoesNotKnowCannotBeWatched() {
+        // After a wrong ticker the page address keeps it (?t=ZZZZQ), so the star shows; watching must refuse it.
+        launch(SiteUrls.results(site(), "ZZZZQ")).use {
+            eventually { onView(withId(R.id.action_watch)).check(matches(isDisplayed())) }
+            onView(withId(R.id.action_watch)).perform(click())
+            eventually { assertTrue(paths.any { it.startsWith("/api/financials?ticker=ZZZZQ") }) }
+            Thread.sleep(1_000) // give a wrongly accepted add time to happen
+            assertEquals(emptyList<Watched>(), store.all())
+        }
+    }
+
+    @Test
+    fun anUnknownTickerAlreadyOnTheListIsDroppedByTheNextCheck() {
+        store.add("ZZZZQ")
+        store.add("KO")
+        store.update(Watched("KO", "COCA COLA CO", Q2, emptySet(), baselined = true, lastChecked = 1L))
+        runCheck()
+        assertEquals(listOf("KO"), store.all().map { it.ticker })
+    }
+
+    @Test
     fun watchingRecordsTheStartingPointAndShowsInTheWatchlist() {
         launch(SiteUrls.results(site(), "KO")).use {
             eventually { onView(withId(R.id.action_watch)).check(matches(isDisplayed())) }
             onView(withId(R.id.action_watch)).perform(click())
-            assertTrue(store.contains("KO"))
+            eventually { assertTrue(store.contains("KO")) } // added once the app has checked SEC knows KO
 
             // The immediate check records today's filings without alerting about them.
             eventually { assertTrue(store.all().single().baselined) }

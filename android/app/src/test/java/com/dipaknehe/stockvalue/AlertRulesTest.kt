@@ -80,6 +80,24 @@ class AlertRulesTest {
 
     @Test
     fun onlyTheAgreedTypesCountAsSerious() {
-        assertEquals(setOf("non_reliance", "auditor_change", "late_filing", "amendment"), AlertRules.SERIOUS)
+        assertEquals(
+            setOf("non_reliance", "auditor_change", "late_filing", "amendment", "bankruptcy", "delisting_notice", "cyber_incident", "impairment"),
+            AlertRules.SERIOUS,
+        )
+    }
+
+    @Test
+    fun theNewSeriousEightKEventsAreAnnouncedButAcquisitionsAreNot() {
+        val notice = FilingEvent("2026-08-01", "delisting_notice", "8-K", "https://sec/301")
+        val writeDown = FilingEvent("2026-08-02", "impairment", "8-K", "https://sec/206")
+        val hack = FilingEvent("2026-08-03", "cyber_incident", "8-K", "https://sec/105")
+        val bankrupt = FilingEvent("2026-08-04", "bankruptcy", "8-K", "https://sec/103")
+        val deal = FilingEvent("2026-08-05", "acquisition", "8-K", "https://sec/201")
+        val (updated, alerts) = AlertRules.check(baselined(q3), status(q3, deal, bankrupt, hack, writeDown, notice), 200L)
+        assertEquals(
+            listOf(notice, writeDown, hack, bankrupt).map { Alert.Warning("KO", "COCA COLA CO", it) }, // oldest first
+            alerts,
+        )
+        assertTrue(deal.key in updated.seenEvents) // recorded, so it's never announced later either
     }
 }

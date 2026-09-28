@@ -69,7 +69,8 @@ class FilingCheckWorker(context: Context, params: WorkerParameters) : Worker(con
             val status = try {
                 api.fetch(watched.ticker)
             } catch (_: StatusApi.NotFound) {
-                continue // unknown ticker: skip it, keep checking the others
+                store.remove(watched.ticker) // SEC doesn't know it (e.g. added offline from a wrong ticker): drop it
+                continue
             } catch (_: IOException) {
                 failed = true // network problem: remember to retry
                 continue
