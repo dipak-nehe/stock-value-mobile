@@ -1,7 +1,7 @@
 import { say, type Lang } from '../lang.js';
 
 /** The results page's tabs, in order. */
-export const TABS = ['overview', 'flags', 'history', 'value', 'charts', 'data'] as const;
+export const TABS = ['overview', 'flags', 'history', 'insiders', 'value', 'charts', 'data'] as const;
 export type Tab = (typeof TABS)[number];
 
 /**
@@ -71,6 +71,11 @@ export class WebAnalysisPage {
 
     get flags() {
         return $('[data-testid="flags"]');
+    }
+
+    /** The Insiders tab's section (insider trades from SEC Form 4s; says "Loading…" until they arrive). */
+    get insiders() {
+        return $('[data-testid="insiders"]');
     }
 
     get historyTiles() {
