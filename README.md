@@ -21,6 +21,8 @@ e2e/                  end-to-end tests: WebdriverIO + Appium, TypeScript, Allure
   ios/                XCUITest driver: config, native screen objects, specs (own package.json)
 .github/workflows/    android.yml (Linux + emulator), ios.yml (macOS + simulator)
 .github/scripts/      simulator picker, Allure result counts, optional report publishing
+Jenkinsfile           the same builds and tests on Jenkins (Android and iOS in parallel)  → docs/jenkins.md
+jenkins/              Jenkins helper: start and stop a headless Android emulator
 ```
 
 Architecture with diagrams: [android/docs/architecture.md](android/docs/architecture.md) and [ios/docs/architecture.md](ios/docs/architecture.md).
@@ -40,6 +42,10 @@ The end-to-end suites run against a local mock of the web app (exact checks: bro
 ## CI
 
 Each workflow runs only when its app, its tests or the shared test code change (`android/**` or `ios/**`, `e2e/<platform>/**`, `e2e/shared/**`), and on demand from the Actions tab. Reports are artifacts on each run: **appium-allure-report** (end-to-end), **stock-value-debug-apk** (Android), **simulator-screenshots** (iOS). The repo is public, so GitHub's macOS runners are free.
+
+### Jenkins
+
+[`Jenkinsfile`](Jenkinsfile) runs the same builds and tests on a Jenkins server: Android on an agent labelled `android`, iOS on one labelled `macos && xcode`, in parallel. Every build runs the unit tests, lint and both app builds; ticking **DEVICE_TESTS** adds the emulator and simulator tests and the Appium suites. Agents, plugins and how to create the job: [docs/jenkins.md](docs/jenkins.md).
 
 ## Running the end-to-end tests locally
 
