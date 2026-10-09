@@ -1,3 +1,4 @@
+import allureReporter from '@wdio/allure-reporter';
 import { APP, BUNDLE_ID, WEB_INSPECTOR_IDS } from './capabilities.js';
 import type { Lang } from '../../shared/lang.js';
 
@@ -48,11 +49,14 @@ export async function activateApp(): Promise<void> {
 /**
  * Answers iOS's "Allow notifications?" question with Allow, if it's showing (it's asked when the first company is
  * watched). The question comes from iOS, in the phone's language, so accept either language.
+ * Watching asks the site first and only then asks iOS for permission, which can take well over 5 s on a CI runner;
+ * a question left unanswered means no notifications at all, so wait up to 20 s and record what happened.
  */
-export async function allowNotificationsIfAsked(timeout = 5_000): Promise<void> {
+export async function allowNotificationsIfAsked(timeout = 20_000): Promise<void> {
     const shown = await browser
         .waitUntil(async () => driver.getAlertText().then(() => true, () => false), { timeout, interval: 500 })
         .catch(() => false);
+    allureReporter.addAttachment('notification permission', shown ? 'asked: answered Allow' : `not asked within ${timeout / 1000} s`, 'text/plain');
     if (!shown) return;
     const buttons = (await driver.execute('mobile: alert', { action: 'getButtons' })) as string[];
     const allow = buttons.find((b) => /^(Allow|Permitir)$/i.test(b)) ?? buttons[buttons.length - 1];

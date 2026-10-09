@@ -1,7 +1,7 @@
 import { say, type Lang } from '../lang.js';
 
 /** The results page's tabs, in order. */
-export const TABS = ['overview', 'flags', 'history', 'insiders', 'value', 'charts', 'data'] as const;
+export const TABS = ['overview', 'flags', 'history', 'insiders', 'value', 'durable', 'charts', 'data'] as const;
 export type Tab = (typeof TABS)[number];
 
 /**
@@ -20,7 +20,7 @@ export class WebAnalysisPage {
     }
 
     get searchBox() {
-        return $(`aria/${say(this.lang, 'Look up a company', 'Buscar una empresa')}`);
+        return $(`aria/${say(this.lang, 'Look up a company by name or ticker', 'Busca una empresa por nombre o ticker')}`);
     }
 
     get analyzeButton() {
@@ -63,6 +63,11 @@ export class WebAnalysisPage {
     /** #id: a tab's panel (panel-<tab>); its accessible name repeats the tab's, badge count included. */
     panel(name: Tab) {
         return $(`#panel-${name}`);
+    }
+
+    /** The "Durable advantage" tab's "Meets N of 13 criteria" score. */
+    get durableScore() {
+        return $('[data-testid="durable-score"]');
     }
 
     get trendTiles() {

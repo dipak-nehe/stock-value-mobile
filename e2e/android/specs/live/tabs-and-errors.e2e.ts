@@ -14,6 +14,7 @@ const CONTENT: Record<Tab, () => Promise<void>> = {
     history: () => expect(WebAnalysis.historyTiles).toBeElementsArrayOfSize(6),
     insiders: () => expect(WebAnalysis.insiders).toBeDisplayed(),
     value: () => expect(WebAnalysis.grahamScore).toHaveText(expect.stringMatching(/\d+ of \d+/)),
+    durable: () => expect(WebAnalysis.durableScore).toHaveText(expect.stringMatching(/\d+ of \d+/)),
     charts: async () => expect((await WebAnalysis.chart('cRevenue').getSize()).height).toBeGreaterThan(100),
     data: () => expect(WebAnalysis.dataTable).toBeDisplayed(),
 };
