@@ -18,7 +18,10 @@ describe('Live site smoke test', () => {
         await inWebView(async () => {
             await expect(WebAnalysis.siteTitle).toHaveText(expect.stringContaining('10-Year Stock Value Analysis'), { wait: 60_000 });
             await WebAnalysis.waitUntilReady();
-            await expect(WebAnalysis.analyzeButton).toBeDisabled(); // nothing typed yet: the site won't search for nothing
+            // Analyze is ready as soon as the page's script runs; with nothing typed it shows a hint instead of searching
+            await expect(WebAnalysis.analyzeButton).toBeEnabled();
+            await WebAnalysis.analyzeButton.click();
+            await expect(WebAnalysis.searchHint).toBeDisplayed();
             await WebAnalysis.search('KO');
             await expect(WebAnalysis.companyName).toHaveText('COCA COLA CO (KO)', { wait: 90_000 });
             await expect(WebAnalysis.glance).toBeDisplayed();

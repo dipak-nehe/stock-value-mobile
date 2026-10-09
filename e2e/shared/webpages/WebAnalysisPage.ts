@@ -35,7 +35,7 @@ export class WebAnalysisPage {
         });
     }
 
-    /** Types a ticker and presses Analyze, which the site enables only once there's a ticker in the box. */
+    /** Types a ticker and presses Analyze. */
     async search(ticker: string): Promise<void> {
         await this.searchBox.setValue(ticker);
         await this.analyzeButton.waitForEnabled({ timeout: 30_000 });
@@ -63,6 +63,11 @@ export class WebAnalysisPage {
     /** #id: a tab's panel (panel-<tab>); its accessible name repeats the tab's, badge count included. */
     panel(name: Tab) {
         return $(`#panel-${name}`);
+    }
+
+    /** "Type a ticker first…", shown when Analyze is pressed with an empty box. */
+    get searchHint() {
+        return $('[data-testid="search-hint"]');
     }
 
     /** The "Durable advantage" tab's "Meets N of 13 criteria" score. */
