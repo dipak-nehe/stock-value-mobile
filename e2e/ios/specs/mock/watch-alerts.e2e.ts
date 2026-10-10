@@ -57,15 +57,15 @@ describe('Filing alerts', () => {
         await WatchlistScreen.checkNowButton.click();
         await WatchlistScreen.waitForDetail('Latest report: 10-Q filed 2026-07-29');
 
+        // The report and the late filing are announced, each checked as it arrives: iOS stacks an app's
+        // notifications, newest on top, so one can hide the other a moment later.
         await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
-        await expect(Notifications.notification('late-filing notice (NT 10-K)')).toBeDisplayed();
-        await screenshot('Notification Center with the two alerts');
-        // The report and the late filing are announced; the SEC letter isn't. (iOS exposes each card as several
-        // elements and may add a group label, so check the texts rather than count elements.)
-        const texts = await Notifications.texts('COCA COLA CO (KO)');
-        expect(texts.some((t) => t.includes('Filed a new 10-Q on 2026-07-29'))).toBe(true);
-        expect(texts.some((t) => t.includes('late-filing notice (NT 10-K)'))).toBe(true);
-        expect(texts.filter((t) => /UPLOAD|comment letter|letter from/i.test(t))).toEqual([]);
+        await expect(Notifications.notification('late-filing notice (NT 10-K)')).toBeExisting({ wait: 30_000 });
+        await screenshot('Notification Center with the alerts');
+        // The SEC letter isn't announced
+        for (const letter of ['UPLOAD', 'comment letter', 'letter from']) {
+            await expect(Notifications.notification(letter)).not.toBeExisting();
+        }
         await Notifications.close();
     });
 
@@ -75,8 +75,9 @@ describe('Filing alerts', () => {
             await expect(MockPage.title).toHaveText('Home');
         });
         site.requests.length = 0;
-        await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
-        await Notifications.tap('Filed a new 10-Q on 2026-07-29');
+        // Tap whichever of the two alerts is on top of the stack: both open Coca-Cola's analysis
+        const alert = await Notifications.waitForAny(['Filed a new 10-Q on 2026-07-29', 'late-filing notice (NT 10-K)']);
+        await Notifications.tap(alert);
         await inWebView(async () => {
             await expect(MockPage.title).toHaveText('KO results', { wait: 30_000 });
             await expect(browser).toHaveUrl(expect.stringContaining('/?t=KO'));

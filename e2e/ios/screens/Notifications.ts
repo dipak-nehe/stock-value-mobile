@@ -46,10 +46,29 @@ class Notifications {
 
     /** Opens Notification Center and waits for a notification containing `text`. */
     async waitFor(text: string, timeout = 60_000): Promise<void> {
-        await this.open();
-        await this.notification(text).waitForDisplayed({ timeout, timeoutMsg: `no notification with "${text}"` });
-        // Evidence for the report: what Notification Center contained.
-        allureReporter.addAttachment('Notification Center UI tree', await driver.getPageSource(), 'application/xml');
+        await this.waitForAny([text], timeout);
+    }
+
+    /**
+     * Opens Notification Center and waits for a notification containing any of `texts`; returns the one found.
+     * iOS stacks an app's notifications, newest on top, and only the top card can be read, so a test that expects
+     * several alerts asks for any of them. The swipe that opens Notification Center doesn't always take on the
+     * simulator, so if nothing shows up, close and swipe again (3 tries in all).
+     */
+    async waitForAny(texts: string[], timeout = 60_000): Promise<string> {
+        const tries = 3, each = Math.round(timeout / tries);
+        for (let attempt = 1; attempt <= tries; attempt++) {
+            await this.open();
+            const found = await browser.waitUntil(async () => {
+                for (const text of texts) if (await this.notification(text).isDisplayed().catch(() => false)) return text;
+                return false;
+            }, { timeout: each, interval: 1_000 }).catch(() => false);
+            // Evidence for the report: what Notification Center contained.
+            allureReporter.addAttachment(`Notification Center UI tree (try ${attempt})`, await driver.getPageSource(), 'application/xml');
+            if (found) return found as string;
+            if (attempt < tries) await this.close();
+        }
+        throw new Error(`no notification with ${texts.map((t) => `"${t}"`).join(' or ')}`);
     }
 
     /**
