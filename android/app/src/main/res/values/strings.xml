@@ -5,6 +5,7 @@
     <string name="offline_title">Can\'t reach the site</string>
     <string name="offline_message">Check your internet connection and try again.</string>
     <string name="retry">Try again</string>
+    <string name="share_csv">Save or share the CSV</string>
     <string name="no_app_for_link">No app found to open this link</string>
     <!-- Watch button and Watchlist -->
     <string name="action_watch_generic">Watch</string>

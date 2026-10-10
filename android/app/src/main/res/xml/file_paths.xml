@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The only folder the share sheet may read: CSVs the web app handed over (MainActivity.FileBridge). -->
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>

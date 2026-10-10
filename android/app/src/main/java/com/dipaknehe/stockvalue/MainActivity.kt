@@ -13,6 +13,7 @@ import android.os.Message
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
@@ -29,11 +30,13 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.net.toUri
 import androidx.core.view.updatePadding
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import java.io.File
 
 /**
  * The main screen: the web app in a WebView, with loading, offline and back handling, plus the Watch button for
@@ -65,6 +68,8 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_SITE_URL = "com.dipaknehe.stockvalue.SITE_URL"
         // Added to the WebView's user agent ("… StockValueAndroid/1.0") so the site can tell app visits apart.
         const val USER_AGENT_TAG = "StockValueAndroid"
+        /** The name the web app looks for: window.StockValueAndroid.saveFile(name, text). */
+        const val FILE_BRIDGE = "StockValueAndroid"
         private const val TAG = "StockValue"
 
         /** A page of the web app to open, e.g. from a filing-alert notification or the Watchlist screen. */
@@ -232,7 +237,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // JavaScript is required: the web app is a JavaScript page. No JavaScript bridge is exposed to it.
+    // JavaScript is required: the web app is a JavaScript page. The only bridge exposed to it is FileBridge below
+    // ("save or share this file"), which only answers pages of the web app.
     @SuppressLint("SetJavaScriptEnabled")
     private fun configureWebView() {
         // Debug builds only: lets Appium (e2e/) and Chrome DevTools inspect the page. Release builds stay closed.
@@ -247,6 +253,7 @@ class MainActivity : ComponentActivity() {
             setSupportMultipleWindows(true)   // target=_blank links arrive in onCreateWindow (see below)
             userAgentString = "$userAgentString $USER_AGENT_TAG/${BuildConfig.VERSION_NAME}"
         }
+        webView.addJavascriptInterface(FileBridge(), FILE_BRIDGE)
         webView.webViewClient = PageClient()
         webView.webChromeClient = object : WebChromeClient() {
             // Moves the thin loading bar at the top (0–100).
@@ -379,6 +386,40 @@ class MainActivity : ComponentActivity() {
         webView.visibility = View.INVISIBLE
         errorPanel.visibility = View.VISIBLE
         refresh.isRefreshing = false
+    }
+
+    /**
+     * The web app's "Download CSV" buttons: a WebView can't save a download, so the page hands the file here
+     * (window.StockValueAndroid.saveFile in public/js/csv.js) and the phone's share sheet opens: save to Files or Drive,
+     * email it, or open it in a spreadsheet app. Only pages of the web app are answered, and the file stays in the
+     * app's own cache until shared.
+     */
+    private inner class FileBridge {
+        @JavascriptInterface
+        fun saveFile(name: String, text: String) {
+            if (text.length > FileExport.MAX_CHARS) return
+            // JavaScript calls arrive on a background thread; the page's address and the share sheet need the UI thread.
+            runOnUiThread {
+                if (policy.targetFor(webView.url ?: "") != SitePolicy.Target.APP) return@runOnUiThread
+                shareFile(FileExport.safeName(name), text)
+            }
+        }
+    }
+
+    private fun shareFile(name: String, text: String) {
+        val file = File(File(cacheDir, "exports").apply { mkdirs() }, name)
+        file.writeText(text)
+        val uri = FileProvider.getUriForFile(this, "$packageName.files", file)
+        val send = Intent(Intent.ACTION_SEND)
+            .setType("text/csv")
+            .putExtra(Intent.EXTRA_STREAM, uri)
+            .putExtra(Intent.EXTRA_TITLE, name)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        try {
+            startActivity(Intent.createChooser(send, getString(R.string.share_csv)))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.no_app_for_link, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /** Open a link in another app (browser, mail), or say no app can open it. */

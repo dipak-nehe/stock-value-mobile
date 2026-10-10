@@ -26,8 +26,12 @@ final class WebController: NSObject, ObservableObject {
         // Adds "StockValueiOS/1.0" to the browser's user agent so the site can tell app visits apart.
         config.applicationNameForUserAgent = "\(AppInfo.userAgentTag)/\(AppInfo.version)"
         config.websiteDataStore = .default() // the web app remembers the chosen language
+        // The web app's "Download CSV" buttons post their file here (public/js/csv.js): see saveFile below.
+        let files = FileMessageHandler()
+        config.userContentController.add(files, name: "saveFile")
         webView = WKWebView(frame: .zero, configuration: config)
         super.init()
+        files.controller = self
         webView.navigationDelegate = self
         webView.uiDelegate = self
         webView.allowsBackForwardNavigationGestures = true // swipe from the edge to go back
@@ -72,6 +76,29 @@ final class WebController: NSObject, ObservableObject {
 
     func goBack() {
         if webView.canGoBack { webView.goBack() }
+    }
+
+    /// A file the web app handed over (a WKWebView can't save downloads itself): open the share sheet so it can be
+    /// saved to Files, emailed or opened in a spreadsheet app. Only pages of the web app are answered.
+    func saveFile(name: String, text: String, from url: URL?) {
+        guard let url, policy.target(for: url.absoluteString) == .app, text.count <= FileExport.maxChars else { return }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("exports", isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let file = folder.appendingPathComponent(FileExport.safeName(name))
+        do { try text.write(to: file, atomically: true, encoding: .utf8) } catch { return }
+        let sheet = UIActivityViewController(activityItems: [file], applicationActivities: nil)
+        // On iPad the sheet is a popover: anchor it to the middle of the page.
+        sheet.popoverPresentationController?.sourceView = webView
+        sheet.popoverPresentationController?.sourceRect = CGRect(x: webView.bounds.midX, y: webView.bounds.midY, width: 1, height: 1)
+        topViewController()?.present(sheet, animated: true)
+    }
+
+    private func topViewController() -> UIViewController? {
+        let window = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows).first { $0.isKeyWindow }
+        var top = window?.rootViewController
+        while let shown = top?.presentedViewController { top = shown }
+        return top
     }
 
     @objc private func pulledToRefresh(_ sender: UIRefreshControl) {
@@ -140,4 +167,17 @@ struct WebView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> WKWebView { controller.webView }
     func updateUIView(_ uiView: WKWebView, context: Context) {}
+}
+
+/// Receives "saveFile" messages from the page ({ name, text }) and passes them to the controller. A separate object,
+/// held weakly, because WebKit keeps message handlers alive for as long as the web view.
+final class FileMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var controller: WebController?
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.frameInfo.isMainFrame, let body = message.body as? [String: Any],
+              let name = body["name"] as? String, let text = body["text"] as? String else { return }
+        let url = message.frameInfo.request.url
+        Task { @MainActor [weak controller] in controller?.saveFile(name: name, text: text, from: url) }
+    }
 }

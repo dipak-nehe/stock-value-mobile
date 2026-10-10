@@ -37,5 +37,16 @@
             android:exported="false"
             android:label="@string/watchlist"
             android:parentActivityName=".MainActivity" />
+
+        <!-- Lets the share sheet read a CSV the web app handed over (MainActivity.FileBridge); only res/xml/file_paths.xml. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>

@@ -5,6 +5,8 @@
 
 Native Android (Kotlin) and iOS (Swift) apps for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): the web app in a web view, plus what a website can't do: a **watchlist that checks SEC filings in the background and sends notifications** about new annual or quarterly reports and serious warnings (restatement warnings, auditor changes, late filings, stock-exchange notices, cybersecurity incidents, large write-downs, bankruptcies). English and Spanish.
 
+Every page of the web app opens inside the apps (results, compare, My portfolio, the S&P 500 picker, How we calculate). The web app's **Download CSV** buttons hand the file to the app, which opens the phone's share sheet (save to Files or Drive, email it, open it in a spreadsheet app): a web view can't save downloads by itself. On Android this is the only bridge the page can call, and both apps answer only pages of the web app.
+
 Both apps follow the same design and the same rules, and are tested the same way, down to one shared set of page objects for the web content.
 
 ## What's where
@@ -31,7 +33,7 @@ Architecture with diagrams: [android/docs/architecture.md](android/docs/architec
 
 | | Android | iOS |
 |---|---|---|
-| Unit | 21 JVM tests | 22 XCTest tests |
+| Unit | 24 JVM tests | 25 XCTest tests |
 | Instrumented | 11 Espresso tests | (launch check with screenshots) |
 | End-to-end | 34 Appium tests (UiAutomator2) | 34 Appium tests (XCUITest) |
 
