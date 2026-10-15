@@ -2,7 +2,7 @@
 
 Every end-to-end test of the two apps, by spec file. They drive the installed debug app on a device the way a person does, with WebdriverIO + Appium (UiAutomator2 on an Android emulator, XCUITest on an iOS simulator), and switch into the app's web view for the web pages. Each test has a screenshot and a video in its platform's Allure report (the `appium-allure-report` artifact of each CI run). How these fit with the unit and instrumented tests: [test-plan.md](test-plan.md).
 
-**34 Android + 34 iOS tests in 9 spec files each**, the same scenarios on both platforms. The *mock* suite runs against a local copy of the web app (`e2e/shared/mockSite.ts`) whose filings the tests change; the *live* suite runs against https://stock-value-analysis.vercel.app with real SEC data. The web page objects in `e2e/shared/webpages/` are shared by both platforms.
+**38 Android + 38 iOS tests in 10 spec files each**, the same scenarios on both platforms. The *mock* suite runs against a local copy of the web app (`e2e/shared/mockSite.ts`) whose filings the tests change; the *live* suite runs against https://stock-value-analysis.vercel.app with real SEC data. The web page objects in `e2e/shared/webpages/` are shared by both platforms.
 
 Run one platform with `cd e2e/android && npm test` or `cd e2e/ios && npm test`; one suite with `npm run test:mock` / `npm run test:live`; one file with `npx wdio run wdio.conf.ts --spec ./specs/mock/offline.e2e.ts`. On GitHub, the iOS workflow's *Run workflow* button takes a spec file too.
 
@@ -119,3 +119,12 @@ axe-core (WCAG 2.1 A/AA) on the live start and results pages inside the app.
 - **Touch targets:** Android 48 dp; iOS 44 pt (navigation-bar buttons: width only, because iOS makes the whole bar height tappable).
 - **Reaching the mock site:** Android through `adb reverse`; the iOS simulator uses the Mac's `localhost` directly.
 - **Known issue (iOS):** opening a notification from Notification Center on the iOS 26 simulator isn't reliable yet; see the test plan's current status.
+
+### Mutual funds & ETFs in the app (live site) (`specs/live/funds.e2e.ts`, 4)
+
+| # | Test | Platforms |
+|---|---|---|
+| 35 | opens the Funds page inside the app from the header | Android, iOS |
+| 36 | shows a fund's costs, returns and top 10 holdings from real SEC filings | Android, iOS |
+| 37 | compares a second fund, with how much they overlap | Android, iOS |
+| 38 | the Funds page passes axe-core inside the app | Android, iOS |

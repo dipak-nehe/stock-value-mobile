@@ -56,6 +56,11 @@ export class WebAnalysisPage {
     }
 
     /** #id: the link text is hard-coded copy with an arrow. */
+    /** "Funds" in the header (after S&P 500): the mutual funds & ETFs page. */
+    get fundsLink() {
+        return $('a[data-funds-link]');
+    }
+
     get compareLink() {
         return $('#compareLink');
     }
