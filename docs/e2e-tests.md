@@ -124,7 +124,7 @@ axe-core (WCAG 2.1 A/AA) on the live start and results pages inside the app.
 
 | # | Test | Platforms |
 |---|---|---|
-| 35 | opens the Funds page inside the app from the header | Android, iOS |
+| 35 | opens the Funds & ETFs page inside the app from the header, its scripts running | Android, iOS |
 | 36 | shows a fund's costs, returns and top 10 holdings from real SEC filings | Android, iOS |
 | 37 | compares a second fund, with how much they overlap | Android, iOS |
 | 38 | the Funds page passes axe-core inside the app | Android, iOS |

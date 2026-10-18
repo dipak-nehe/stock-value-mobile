@@ -5,7 +5,7 @@
 
 Native Android (Kotlin) and iOS (Swift) apps for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): the web app in a web view, plus what a website can't do: a **watchlist that checks SEC filings in the background and sends notifications** about new annual or quarterly reports and serious warnings (restatement warnings, auditor changes, late filings, stock-exchange notices, cybersecurity incidents, large write-downs, bankruptcies). English and Spanish.
 
-Every page of the web app opens inside the apps (results, compare, My portfolio, the S&P 500 picker, the Funds page for mutual funds and ETFs). The web app's **Download CSV** buttons hand the file to the app, which opens the phone's share sheet (save to Files or Drive, email it, open it in a spreadsheet app): a web view can't save downloads by itself. On Android this is the only bridge the page can call, and both apps answer only pages of the web app.
+Every page of the web app opens inside the apps (results, compare, My portfolio, the S&P 500 picker, Funds & ETFs). The web app's front end is TypeScript bundled by esbuild (since October 2026); the apps load the built pages like any browser, so nothing in them changes when the site is rebuilt. The web app's **Download CSV** buttons hand the file to the app, which opens the phone's share sheet (save to Files or Drive, email it, open it in a spreadsheet app): a web view can't save downloads by itself. On Android this is the only bridge the page can call, and both apps answer only pages of the web app.
 
 Both apps follow the same design and the same rules, and are tested the same way, down to one shared set of page objects for the web content.
 

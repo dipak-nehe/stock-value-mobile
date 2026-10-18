@@ -19,12 +19,15 @@ describe('Mutual funds & ETFs in the app (live site)', () => {
     it('opens the Funds page inside the app from the header', async () => {
         await inWebView(async () => {
             await WebAnalysis.waitUntilReady();
+            await expect(WebAnalysis.fundsLink).toHaveText('Funds & ETFs');
             await WebAnalysis.fundsLink.click();
         });
         // A new page: reconnect instead of keeping chromedriver on the old one (the CI WebView drops it).
         await inWebView(async () => {
             await expect(browser).toHaveUrl(expect.stringContaining('/funds.html'), { wait: 30_000 });
             await expect(WebFunds.tickerBox).toBeDisplayed();
+            // the page's bundled scripts ran: the example chips are drawn by them
+            await expect(WebFunds.examples).toBeElementsArrayOfSize({ gte: 3 }, { wait: 30_000 });
         }, { retries: 1 });
         await expect(MainScreen.pageArea).toBeDisplayed(); // still in the app, not the browser
         await screenshot('Funds page in the app');

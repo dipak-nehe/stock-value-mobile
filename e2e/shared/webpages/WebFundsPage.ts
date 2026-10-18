@@ -17,6 +17,11 @@ export class WebFundsPage {
         await this.addButton.click();
     }
 
+    /** The example ticker chips under the box ("Try: VOO VTI …"), drawn by the page's script. */
+    get examples() {
+        return $$('[data-testid="fund-examples"] button');
+    }
+
     get result() {
         return $('[data-testid="fund-result"]');
     }
