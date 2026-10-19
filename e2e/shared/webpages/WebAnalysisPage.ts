@@ -56,6 +56,11 @@ export class WebAnalysisPage {
     }
 
     /** #id: the link text is hard-coded copy with an arrow. */
+    /** "All companies" in the header (after S&P 500): every listed company with its exchange and industry. */
+    get companiesLink() {
+        return $('a[data-companies-link]');
+    }
+
     /** "Funds" in the header (after S&P 500): the mutual funds & ETFs page. */
     get fundsLink() {
         return $('a[data-funds-link]');
