@@ -136,3 +136,10 @@ axe-core (WCAG 2.1 A/AA) on the live start and results pages inside the app.
 | 39 | opens the All companies page inside the app from the header, with the full list | Android, iOS |
 | 40 | finds a company by name and opens its analysis in the app | Android, iOS |
 | 41 | the All companies page passes axe-core inside the app | Android, iOS |
+
+### Quarantined
+
+| Test | Platform | Since | Why | To lift it |
+|---|---|---|---|---|
+| notifies about a new quarterly report and a late-filing notice | iOS, in CI only | 2026-10-18 | No notification within the wait on GitHub's iOS simulator in 8 of 10 runs (passes on Android and on re-runs) | Wait longer for the notification, clear the simulator's notifications first, then remove `itLocalOnly` in `specs/mock/watch-alerts.e2e.ts` |
+| tapping a notification opens the company's analysis | iOS, in CI only | 2026-10-18 | Depends on the notification above | Same |
