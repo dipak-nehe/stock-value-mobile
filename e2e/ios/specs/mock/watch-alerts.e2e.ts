@@ -10,13 +10,6 @@ import { screenshot } from '../../support/report.js';
 const Q2: Report = { form: '10-Q', date: '2026-04-28', accession: '0000021344-26-000010', url: 'https://www.sec.gov/q2.htm' };
 const Q3: Report = { form: '10-Q', date: '2026-07-29', accession: '0000021344-26-000020', url: 'https://www.sec.gov/q3.htm' };
 
-// QUARANTINED IN CI (2026-10-18): the two notification tests below failed in 8 of 10 iOS runs on GitHub's simulator
-// from late September (no notification within the wait, also after the automatic retry), while passing on Android and
-// on re-runs: a timing problem on the CI simulator, not a known app bug. They're skipped on CI only, and still run
-// locally (npm test on a Mac). To fix: wait longer for the notification and clear the simulator's notifications before
-// the test, then remove itLocalOnly. Tracked in docs/e2e-tests.md ("Quarantined").
-const itLocalOnly = process.env.CI ? it.skip : it;
-
 describe('Filing alerts', () => {
     const site = new MockSite(8765);
 
@@ -54,21 +47,25 @@ describe('Filing alerts', () => {
         await Notifications.close();
     });
 
-    itLocalOnly('notifies about a new quarterly report and a late-filing notice', async () => {
+    it('notifies about a new quarterly report, then a late-filing notice', async () => {
+        // One alert at a time, each checked as it arrives: iOS stacks an app's notifications, newest on top, and a card
+        // underneath can't be read, so two alerts at once left the first one hidden (most CI failures until 2026-10).
         site.report = Q3;
+        if (!(await WatchlistScreen.checkNowButton.isDisplayed())) await MainScreen.openWatchlist();
+        await WatchlistScreen.checkNowButton.click();
+        await WatchlistScreen.waitForDetail('Latest report: 10-Q filed 2026-07-29');
+        await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
+        await screenshot('Notification Center with the new report');
+        await Notifications.close();
+
         site.events = [
             { date: '2026-08-15', type: 'late_filing', form: 'NT 10-K', url: 'https://www.sec.gov/nt.htm' },
             { date: '2026-08-01', type: 'sec_letter', form: 'UPLOAD', url: 'https://www.sec.gov/letter.pdf' },
         ];
         if (!(await WatchlistScreen.checkNowButton.isDisplayed())) await MainScreen.openWatchlist();
         await WatchlistScreen.checkNowButton.click();
-        await WatchlistScreen.waitForDetail('Latest report: 10-Q filed 2026-07-29');
-
-        // The report and the late filing are announced, each checked as it arrives: iOS stacks an app's
-        // notifications, newest on top, so one can hide the other a moment later.
-        await Notifications.waitFor('Filed a new 10-Q on 2026-07-29');
-        await expect(Notifications.notification('late-filing notice (NT 10-K)')).toBeExisting({ wait: 30_000 });
-        await screenshot('Notification Center with the alerts');
+        await Notifications.waitFor('late-filing notice (NT 10-K)');
+        await screenshot('Notification Center with the late-filing notice');
         // The SEC letter isn't announced
         for (const letter of ['UPLOAD', 'comment letter', 'letter from']) {
             await expect(Notifications.notification(letter)).not.toBeExisting();
@@ -76,17 +73,16 @@ describe('Filing alerts', () => {
         await Notifications.close();
     });
 
-    itLocalOnly('tapping a notification opens the company\'s analysis', async () => {
+    it('opening a notification opens the company\'s analysis', async () => {
         await launchApp({ site: site.url }); // back on the start page first
         await inWebView(async () => {
             await expect(MockPage.title).toHaveText('Home');
         });
         site.requests.length = 0;
-        // Tap whichever of the two alerts is on top of the stack: both open Coca-Cola's analysis
-        const alert = await Notifications.waitForAny(['Filed a new 10-Q on 2026-07-29', 'late-filing notice (NT 10-K)']);
-        await Notifications.tap(alert);
+        // Either alert opens Coca-Cola's analysis; the proof is the page, not Notification Center closing
+        const onKO = () => inWebView(async () => (await MockPage.title.getText()) === 'KO results', { retries: 1 });
+        await Notifications.openUntil(['late-filing notice (NT 10-K)', 'Filed a new 10-Q on 2026-07-29'], onKO);
         await inWebView(async () => {
-            await expect(MockPage.title).toHaveText('KO results', { wait: 30_000 });
             await expect(browser).toHaveUrl(expect.stringContaining('/?t=KO'));
         }, { retries: 1 });
         expect(site.requests).toContain('/?t=KO'); // the page was really requested after the tap

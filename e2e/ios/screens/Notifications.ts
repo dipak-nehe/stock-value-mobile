@@ -72,56 +72,51 @@ class Notifications {
     }
 
     /**
-     * Taps a notification: iOS closes Notification Center and opens the app, which loads the company's page.
-     * An element tap on a notification card doesn't always reach it on iOS 26, so if Notification Center is still
-     * showing, tap the card's centre by its coordinates.
+     * Opens a notification and checks it really opened what it should: `opened` is asked after each try (e.g. "is the
+     * company's page showing?"). Closing Notification Center isn't proof: a gesture can close it without opening the
+     * notification (the app then stays on its start page). So each try reopens Notification Center, finds the card
+     * again, uses one way of opening it, and asks `opened`; the next try uses the next way.
+     * iOS 26 on the simulator: a synthesized tap on a card doesn't always open it, a swipe right sometimes does.
      */
-    async tap(text: string): Promise<void> {
-        // Several elements contain the text: a container spanning several cards (its centre can sit on another app's
-        // notification) and the card itself. Use the smallest one, which is the card.
-        let card = this.notification(text);
-        let rect = { x: 0, y: 0, width: 0, height: 0 };
-        let smallest = Infinity;
-        for (const el of await $$(byLabelContains(text))) {
-            const r = await driver.getElementRect(await el.elementId);
-            if (r.height > 20 && r.width * r.height < smallest) {
-                smallest = r.width * r.height;
-                rect = r;
-                card = el as unknown as typeof card;
-            }
-        }
-        const { x, y, width, height } = rect;
-        const cx = Math.round(x + width / 2), cy = Math.round(y + height / 2);
-        allureReporter.addAttachment('notification card', JSON.stringify(rect), 'text/plain');
-        const opened = () => card.isDisplayed().then((shown) => !shown, () => true);
-        // Don't let Appium wait for the screen to settle after each gesture: while the app opens, the screen keeps
-        // animating, and each wait can take a minute (a run timed out at 4 minutes in here).
-        await driver.updateSettings({ waitForIdleTimeout: 0, animationCoolOffTimeout: 0 });
-        // A synthesized tap on a Notification Center card didn't open the app on iOS 26; a swipe right did (it opened
-        // the card it was on). So swipe first, then fall back to taps.
-        const attempts: [string, () => Promise<unknown>][] = [
-            ['swipe right', () => driver.execute('mobile: dragFromToForDuration', { fromX: x + 20, fromY: cy, toX: x + width - 10, toY: cy, duration: 0.3 })],
-            ['coordinate tap', () => driver.execute('mobile: tap', { x: cx, y: cy })],
-            ['element tap', () => card.click()],
+    async openUntil(texts: string[], opened: () => Promise<boolean>): Promise<void> {
+        const ways: [string, (r: { x: number; y: number; width: number; height: number }, card: WebdriverIO.Element) => Promise<unknown>][] = [
+            ['coordinate tap', (r) => driver.execute('mobile: tap', { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) })],
+            ['swipe right', (r) => driver.execute('mobile: dragFromToForDuration', { fromX: r.x + 20, fromY: Math.round(r.y + r.height / 2), toX: r.x + r.width - 10, toY: Math.round(r.y + r.height / 2), duration: 0.3 })],
+            ['element tap', (_r, card) => card.click()],
+            ['coordinate tap, again', (r) => driver.execute('mobile: tap', { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) })],
         ];
-        let worked = '';
-        try {
-            for (const [name, attempt] of attempts) {
-                await attempt().catch(() => undefined);
-                await browser.pause(1_500);
-                await screenshot(`after ${name}`);
-                if (await browser.waitUntil(opened, { timeout: 5_000 }).catch(() => false)) {
-                    worked = name;
-                    break;
-                }
+        const tried: string[] = [];
+        for (const [name, way] of ways) {
+            const text = await this.waitForAny(texts);
+            // Several elements contain the text (the card and a container spanning cards): use the smallest, the card.
+            let card = await this.notification(text).getElement();
+            let rect = { x: 0, y: 0, width: 0, height: 0 }, smallest = Infinity;
+            for (const el of await $$(byLabelContains(text))) {
+                const r = await driver.getElementRect(await el.elementId);
+                if (r.height > 20 && r.width * r.height < smallest) { smallest = r.width * r.height; rect = r; card = el as unknown as WebdriverIO.Element; }
             }
-        } finally {
-            await driver.updateSettings({ waitForIdleTimeout: 10, animationCoolOffTimeout: 2 });
+            // While the app opens the screen keeps animating: don't let Appium wait for it to settle after the gesture.
+            await driver.updateSettings({ waitForIdleTimeout: 0, animationCoolOffTimeout: 0 });
+            try {
+                await way(rect, card).catch(() => undefined);
+                await browser.pause(2_000);
+            } finally {
+                await driver.updateSettings({ waitForIdleTimeout: 10, animationCoolOffTimeout: 2, defaultActiveApplication: 'auto' });
+            }
+            await screenshot(`after ${name}`);
+            const ok = await opened().catch(() => false);
+            tried.push(`${name}: ${ok ? 'opened' : 'not opened'}`);
+            if (ok) {
+                allureReporter.addAttachment('how the notification was opened', tried.join('\n'), 'text/plain');
+                return;
+            }
+            // Back to the app, so the next try starts from the same place
+            await driver.execute('mobile: pressButton', { name: 'home' }).catch(() => undefined);
+            await activateApp();
+            await browser.pause(1_000);
         }
-        allureReporter.addAttachment('how the notification was opened', worked || 'none of: swipe right, coordinate tap, element tap', 'text/plain');
-        await driver.updateSettings({ defaultActiveApplication: 'auto' });
-        if (!worked) throw new Error('Notification Center stayed open after tapping, tapping by position and swiping the notification');
-        await browser.pause(1_000);
+        allureReporter.addAttachment('how the notification was opened', tried.join('\n'), 'text/plain');
+        throw new Error(`the notification didn't open the page (${tried.join('; ')})`);
     }
 }
 
