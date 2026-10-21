@@ -139,7 +139,7 @@ axe-core (WCAG 2.1 A/AA) on the live start and results pages inside the app.
 
 ### Quarantined
 
-| Test | Platform | Since | Why | To lift it |
-|---|---|---|---|---|
-| notifies about a new quarterly report and a late-filing notice | iOS, in CI only | 2026-10-18 | No notification within the wait on GitHub's iOS simulator in 8 of 10 runs (passes on Android and on re-runs) | Wait longer for the notification, clear the simulator's notifications first, then remove `itLocalOnly` in `specs/mock/watch-alerts.e2e.ts` |
-| tapping a notification opens the company's analysis | iOS, in CI only | 2026-10-18 | Depends on the notification above | Same |
+None. The two iOS notification tests were quarantined in CI from 2026-10-18 to 2026-10-20. The cause: iOS stacks
+notifications, so the 10-Q alert was hidden under the late-filing one, and a tap that only closed Notification Center
+was counted as success. They now check one alert at a time and confirm the analysis page opened after each tap; 5 of 5
+CI runs passed.
