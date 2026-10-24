@@ -66,6 +66,33 @@ export class WebAnalysisPage {
         return $('a[data-funds-link]');
     }
 
+    /** The main menu's link texts in order, and the one marked as the current page (aria-current). */
+    async menu(): Promise<{ links: string[]; current: string | null }> {
+        return browser.execute(() => {
+            const nav = document.querySelector('nav.top-actions');
+            const text = (el: Element | null | undefined) => el?.textContent?.trim() ?? null;
+            return {
+                links: [...(nav?.querySelectorAll('a') ?? [])].map((a) => text(a) ?? ''),
+                current: text(nav?.querySelector('[aria-current="page"]')),
+            };
+        });
+    }
+
+    /** "Compare" in the main menu (the results page's own "Compare with another stock" link is compareLink). */
+    get compareMenuLink() {
+        return $('a[data-compare-link]');
+    }
+
+    /** The Buffett & Graham tab's value estimate (no price needed). */
+    get valueTiles() {
+        return $('[data-testid="value-tiles"]');
+    }
+
+    /** The Buffett & Graham tab's tiles at the entered price (owner earnings yield, margin of safety). */
+    get priceTiles() {
+        return $('[data-testid="price-tiles"]');
+    }
+
     get compareLink() {
         return $('#compareLink');
     }
