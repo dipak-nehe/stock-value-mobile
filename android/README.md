@@ -2,7 +2,7 @@
 
 [![android](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/android.yml/badge.svg)](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/android.yml)
 
-An Android app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Graham & Buffett checklists and a side-by-side compare page. The app is a small native shell around a WebView, so it always shows the current version of the web app ([source](https://github.com/dipak-nehe/stock-trend-analyzer)) with no separate release needed for content changes.
+An Android app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Buffett & Graham checklists and a side-by-side compare page. The app is a small native shell around a WebView, so it always shows the current version of the web app ([source](https://github.com/dipak-nehe/stock-trend-analyzer)) with no separate release needed for content changes.
 
 **How it's built:** [docs/architecture.md](docs/architecture.md): system context, components, the page and alert flows, data, security, testing and CI, with diagrams.
 

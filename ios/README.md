@@ -2,7 +2,7 @@
 
 [![ios](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/ios.yml/badge.svg)](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/ios.yml)
 
-An iPhone and iPad app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Graham & Buffett checklists and a compare page. Like its [Android sibling](../android/), it's a small native shell around the web app, plus what a website can't do: a **watchlist with filing alerts**.
+An iPhone and iPad app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Buffett & Graham checklists and a compare page. Like its [Android sibling](../android/), it's a small native shell around the web app, plus what a website can't do: a **watchlist with filing alerts**.
 
 ## What it does
 
