@@ -1,6 +1,6 @@
 # Test plan: 10-Year Stock Value Analysis apps (Android and iOS)
 
-How the two native apps are tested: what is covered, at which level, on which devices and data, and what "done" means. The list of every end-to-end test is [e2e-tests.md](e2e-tests.md). The web app's own pages and data are tested in the [web app's repository](https://github.com/dipak-nehe/stock-trend-analyzer) ([its test plan](https://github.com/dipak-nehe/stock-trend-analyzer/blob/main/docs/test-plan.md)); here the web pages are tested only *inside* the apps.
+How the two native apps are tested: what is covered, at which level, on which devices and data, and what "done" means. The list of every end-to-end test is [e2e-tests.md](e2e-tests.md). The web app's own pages and data are tested in the web app's repository (private since 2026-10-25), with its own test plan; here the web pages are tested only *inside* the apps.
 
 **At a glance**
 
