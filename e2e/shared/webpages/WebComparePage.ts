@@ -14,8 +14,9 @@ export class WebComparePage {
         return $('#tickerB');
     }
 
+    /** #id: "Compare" is also the main menu's link to this page (since 2026-10-24), and `aria/` returned that link first. */
     get compareButton() {
-        return $(`aria/${say(this.lang, 'Compare', 'Comparar')}`);
+        return $('#goB');
     }
 
     async compareWith(ticker: string): Promise<void> {
