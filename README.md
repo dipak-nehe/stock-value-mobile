@@ -43,7 +43,7 @@ The end-to-end suites run against a local mock of the web app (exact checks: bro
 
 ## CI
 
-Each workflow runs only when its app, its tests or the shared test code change (`android/**` or `ios/**`, `e2e/<platform>/**`, `e2e/shared/**`), and on demand from the Actions tab. Reports are artifacts on each run: **appium-allure-report** (end-to-end), **stock-value-debug-apk** (Android), **simulator-screenshots** (iOS). The repo is public, so GitHub's macOS runners are free.
+Each workflow runs when its app, its tests or the shared test code change (`android/**` or `ios/**`, `e2e/<platform>/**`, `e2e/shared/**`), every Monday (the live tests check the website, which changes without a push here), and on demand from the Actions tab. Reports are artifacts on each run: **appium-allure-report** (end-to-end), **stock-value-debug-apk** (Android), **simulator-screenshots** (iOS). The repo is public, so GitHub's macOS runners are free.
 
 ### Jenkins
 

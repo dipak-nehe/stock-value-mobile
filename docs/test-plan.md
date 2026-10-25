@@ -79,7 +79,7 @@ How the two native apps are tested: what is covered, at which level, on which de
 
 ## 7. CI and reporting
 
-- **One repository, two workflows** with path filters: `.github/workflows/android.yml` runs when `android/`, `e2e/android/` or `e2e/shared/` change; `ios.yml` for `ios/`, `e2e/ios/` or `e2e/shared/`.
+- **One repository, two workflows** with path filters: `.github/workflows/android.yml` runs when `android/`, `e2e/android/` or `e2e/shared/` change; `ios.yml` for `ios/`, `e2e/ios/` or `e2e/shared/`. Both also run every Monday (Android 09:00, iOS 10:00 UTC), so a website change that breaks the apps' live tests shows up within a week.
 - **Android jobs:** unit tests + lint + debug APK (artifact `stock-value-debug-apk`); Espresso on an emulator (report and logcat on failure); Appium end-to-end.
 - **iOS jobs:** build + unit tests + launch screenshots (artifact `simulator-screenshots`); Appium end-to-end. *Run workflow* has a **spec** field to run a single spec file (about 10 minutes, unit job skipped).
 - **Reports:** an Allure report per platform (artifact `appium-allure-report`), the pass count on the run's summary page, and the Appium logs on failure.

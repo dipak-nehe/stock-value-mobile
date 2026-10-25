@@ -1,6 +1,6 @@
 name: android
 
-# Runs only when the Android app, its end-to-end tests or the shared test code change.
+# Runs when the Android app, its end-to-end tests or the shared test code change, and every Monday.
 on:
   push:
     paths:
@@ -16,6 +16,10 @@ on:
       - "e2e/android/**"
       - "e2e/shared/**"
       - ".github/workflows/android.yml"
+  # Every Monday (09:00 UTC): the live tests run against the website, which changes without a push here, so a
+  # site change that breaks the apps (e.g. a new menu link sharing a button's name) shows up within a week.
+  schedule:
+    - cron: "0 9 * * 1"
   workflow_dispatch:   # "Run workflow" button, e.g. to publish the report right after adding VERCEL_TOKEN
 
 jobs:

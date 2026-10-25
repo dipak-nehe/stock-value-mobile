@@ -83,7 +83,7 @@ To install on a phone without Android Studio: download the **stock-value-debug-a
 | **Emulator** (Espresso + Espresso-Web + WorkManager testing, 11 tests) | `app/src/androidTest/…` | Against a local test server. `MainActivityTest`: the page loads and the user agent names the app; a link within the site stays in the app and Back returns; external and new-tab links go to the browser; the offline screen appears and *Try again* recovers. `WatchTest`: the Watch button shows only on a results page; watching records the starting point without alerts and shows in the Watchlist, where it can be removed; a check posts exactly the expected notifications once; an unknown ticker doesn't stop the others; a notification opens the company's page |
 | **Lint** | `./gradlew lintDebug` | Android Lint with warnings as errors (version-update checks are left to Dependabot) |
 
-GitHub Actions (`.github/workflows/android.yml` at the repo root; it runs when `android/`, `e2e/android/` or `e2e/shared/` change) runs three jobs on every push: unit tests, lint and the debug APK (uploaded); the Espresso tests on an Android 14 emulator; and the WebdriverIO + Appium suites on another emulator, with the Allure report uploaded.
+GitHub Actions (`.github/workflows/android.yml` at the repo root; it runs when `android/`, `e2e/android/` or `e2e/shared/` change, and every Monday) runs three jobs on every push: unit tests, lint and the debug APK (uploaded); the Espresso tests on an Android 14 emulator; and the WebdriverIO + Appium suites on another emulator, with the Allure report uploaded.
 
 ## End-to-end tests (WebdriverIO + Appium)
 

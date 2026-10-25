@@ -1,6 +1,6 @@
 name: ios
 
-# Runs only when the iOS app, its end-to-end tests or the shared test code change.
+# Runs when the iOS app, its end-to-end tests or the shared test code change, and every Monday.
 on:
   push:
     paths:
@@ -16,6 +16,10 @@ on:
       - "e2e/ios/**"
       - "e2e/shared/**"
       - ".github/workflows/ios.yml"
+  # Every Monday (10:00 UTC): the live tests run against the website, which changes without a push here, so a
+  # site change that breaks the apps (e.g. a new menu link sharing a button's name) shows up within a week.
+  schedule:
+    - cron: "0 10 * * 1"
   workflow_dispatch:
     inputs:
       spec:
