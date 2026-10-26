@@ -2,7 +2,7 @@
 
 Every end-to-end test of the two apps, by spec file. They drive the installed debug app on a device the way a person does, with WebdriverIO + Appium (UiAutomator2 on an Android emulator, XCUITest on an iOS simulator), and switch into the app's web view for the web pages. Each test has a screenshot and a video in its platform's Allure report (the `appium-allure-report` artifact of each CI run). How these fit with the unit and instrumented tests: [test-plan.md](test-plan.md).
 
-**44 Android + 44 iOS tests in 12 spec files each**, the same scenarios on both platforms. The *mock* suite runs against a local copy of the web app (`e2e/shared/mockSite.ts`) whose filings the tests change; the *live* suite runs against https://stock-value-analysis.vercel.app with real SEC data. The web page objects in `e2e/shared/webpages/` are shared by both platforms.
+**45 Android + 45 iOS tests in 13 spec files each**, the same scenarios on both platforms. The *mock* suite runs against a local copy of the web app (`e2e/shared/mockSite.ts`) whose filings the tests change; the *live* suite runs against https://stock-value-analysis.vercel.app with real SEC data. The web page objects in `e2e/shared/webpages/` are shared by both platforms.
 
 Run one platform with `cd e2e/android && npm test` or `cd e2e/ios && npm test`; one suite with `npm run test:mock` / `npm run test:live`; one file with `npx wdio run wdio.conf.ts --spec ./specs/mock/offline.e2e.ts`. On GitHub, the iOS workflow's *Run workflow* button takes a spec file too.
 
@@ -144,6 +144,12 @@ axe-core (WCAG 2.1 A/AA) on the live start and results pages inside the app.
 | 42 | shows the main menu in task order, with Stocks marked as the current page | Android, iOS |
 | 43 | Compare in the menu opens the compare page inside the app | Android, iOS |
 | 44 | values a bank (JPM) on book value and return on equity, with its earnings yield at a price | Android, iOS |
+
+### Reading a result in the app (live site) (`specs/live/reading.e2e.ts`, 1)
+
+| # | Test | Platforms |
+|---|---|---|
+| 45 | shows the annual report link and the dividend record, but no Print button | Android, iOS |
 
 ### Quarantined
 

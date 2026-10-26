@@ -35,7 +35,7 @@ Architecture with diagrams: [android/docs/architecture.md](android/docs/architec
 |---|---|---|
 | Unit | 24 JVM tests | 25 XCTest tests |
 | Instrumented | 11 Espresso tests | (launch check with screenshots) |
-| End-to-end | 44 Appium tests (UiAutomator2) | 44 Appium tests (XCUITest) |
+| End-to-end | 45 Appium tests (UiAutomator2) | 45 Appium tests (XCUITest) |
 
 **[Test plan](docs/test-plan.md)** (scope, layers, devices, traceability, exit criteria, current status) and **[every end-to-end test](docs/e2e-tests.md)**, side by side for both platforms.
 

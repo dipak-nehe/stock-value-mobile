@@ -83,6 +83,21 @@ export class WebAnalysisPage {
         return $('a[data-compare-link]');
     }
 
+    /** "Annual report (10-K, filed …) ↗" in the results header: the latest annual report itself. */
+    get annualLink() {
+        return $('[data-testid="annual-link"]');
+    }
+
+    /** #id: "Print"; the site leaves it out inside the apps, whose web views can't print. */
+    get printButton() {
+        return $('#printBtn');
+    }
+
+    /** The Overview tab's "Dividend record" card. */
+    get dividends() {
+        return $('[data-testid="dividends"]');
+    }
+
     /** The Buffett & Graham tab's value estimate (no price needed). */
     get valueTiles() {
         return $('[data-testid="value-tiles"]');
