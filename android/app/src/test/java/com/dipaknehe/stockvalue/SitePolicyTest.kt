@@ -16,7 +16,7 @@ class SitePolicyTest {
         assertTarget(APP, "https://www.equitymoat.com/")
         assertTarget(APP, "https://www.equitymoat.com/?t=KO&lang=es#flags")
         assertTarget(APP, "https://www.equitymoat.com/compare.html?a=KO&b=PEP&pa=68")
-        assertTarget(APP, "https://Stock-Value-Analysis.Vercel.app/")          // host names ignore case
+        assertTarget(APP, "https://WWW.EquityMoat.com/")          // host names ignore case
         assertTarget(APP, "https://www.equitymoat.com:443/")      // explicit default port
     }
 

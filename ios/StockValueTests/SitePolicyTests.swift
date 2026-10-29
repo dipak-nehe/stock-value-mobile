@@ -13,7 +13,7 @@ final class SitePolicyTests: XCTestCase {
         assertTarget(.app, "https://www.equitymoat.com/")
         assertTarget(.app, "https://www.equitymoat.com/?t=KO&lang=es#flags")
         assertTarget(.app, "https://www.equitymoat.com/compare.html?a=KO&b=PEP&pa=68")
-        assertTarget(.app, "https://Stock-Value-Analysis.Vercel.app/")      // host names ignore case
+        assertTarget(.app, "https://WWW.EquityMoat.com/")      // host names ignore case
         assertTarget(.app, "https://www.equitymoat.com:443/")  // explicit default port
     }
 
