@@ -5,7 +5,7 @@ import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
 const SITE = 'https://www.equitymoat.com';
-const MENU = ['Stocks', 'Compare', 'S&P 500', 'All companies', 'Funds & ETFs', 'My portfolio'];
+const MENU = ['Stocks', 'Compare', 'S&P 500', 'All companies', 'EU companies', 'Funds & ETFs', 'My portfolio'];
 
 /**
  * The web app's main menu and a bank's valuation inside the Android app (live site). The menu reads in task order with
