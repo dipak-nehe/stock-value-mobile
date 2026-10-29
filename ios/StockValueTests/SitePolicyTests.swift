@@ -3,18 +3,18 @@ import XCTest
 
 /// Same cases as the Android app's SitePolicyTest.
 final class SitePolicyTests: XCTestCase {
-    private let policy = SitePolicy(siteURL: "https://stock-value-analysis.vercel.app/")
+    private let policy = SitePolicy(siteURL: "https://www.equitymoat.com/")
 
     private func assertTarget(_ expected: SitePolicy.Target, _ url: String, line: UInt = #line) {
         XCTAssertEqual(policy.target(for: url), expected, url, line: line)
     }
 
     func testPagesOfTheWebAppStayInTheApp() {
-        assertTarget(.app, "https://stock-value-analysis.vercel.app/")
-        assertTarget(.app, "https://stock-value-analysis.vercel.app/?t=KO&lang=es#flags")
-        assertTarget(.app, "https://stock-value-analysis.vercel.app/compare.html?a=KO&b=PEP&pa=68")
+        assertTarget(.app, "https://www.equitymoat.com/")
+        assertTarget(.app, "https://www.equitymoat.com/?t=KO&lang=es#flags")
+        assertTarget(.app, "https://www.equitymoat.com/compare.html?a=KO&b=PEP&pa=68")
         assertTarget(.app, "https://Stock-Value-Analysis.Vercel.app/")      // host names ignore case
-        assertTarget(.app, "https://stock-value-analysis.vercel.app:443/")  // explicit default port
+        assertTarget(.app, "https://www.equitymoat.com:443/")  // explicit default port
     }
 
     func testOtherSitesOpenInTheBrowser() {
@@ -25,11 +25,11 @@ final class SitePolicyTests: XCTestCase {
     }
 
     func testLookalikeAddressesAreNotTreatedAsTheApp() {
-        assertTarget(.browser, "https://stock-value-analysis.vercel.app.example.com/")
-        assertTarget(.browser, "https://evil-stock-value-analysis.vercel.app/")
-        assertTarget(.browser, "https://other.vercel.app/?next=stock-value-analysis.vercel.app")
-        assertTarget(.browser, "http://stock-value-analysis.vercel.app/")        // plain HTTP never loads in the app
-        assertTarget(.browser, "https://stock-value-analysis.vercel.app:8443/")  // different port
+        assertTarget(.browser, "https://www.equitymoat.com.example.com/")
+        assertTarget(.browser, "https://evil-www.equitymoat.com/")
+        assertTarget(.browser, "https://other.vercel.app/?next=www.equitymoat.com")
+        assertTarget(.browser, "http://www.equitymoat.com/")        // plain HTTP never loads in the app
+        assertTarget(.browser, "https://www.equitymoat.com:8443/")  // different port
     }
 
     func testUnsafeOrUnknownSchemesAreBlocked() {

@@ -2,7 +2,7 @@
 
 How the iOS app is built, how its parts talk to each other and to the web app, and how it's tested and shipped. Written for engineers joining the project and for anyone reviewing it; the [README](../README.md) covers building and running. The [Android app](../../android/) follows the same design; section 9 lists where iOS differs.
 
-**In one sentence:** a small SwiftUI app that shows the web app ([stock-value-analysis.vercel.app](https://stock-value-analysis.vercel.app)) in a WKWebView, and adds what a website can't do: a watchlist that checks SEC filings in the background and sends notifications.
+**In one sentence:** a small SwiftUI app that shows the web app ([www.equitymoat.com](https://www.equitymoat.com)) in a WKWebView, and adds what a website can't do: a watchlist that checks SEC filings in the background and sends notifications.
 
 ---
 

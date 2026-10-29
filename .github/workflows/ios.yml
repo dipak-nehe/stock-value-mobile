@@ -79,11 +79,11 @@ jobs:
           sleep 20
           xcrun simctl io "$UDID" screenshot screenshots/1-start-page.png
           xcrun simctl terminate "$UDID" com.dipaknehe.stockvalue
-          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -OpenURL "https://stock-value-analysis.vercel.app/?t=KO"
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -OpenURL "https://www.equitymoat.com/?t=KO"
           sleep 25
           xcrun simctl io "$UDID" screenshot screenshots/2-ko-results.png
           xcrun simctl terminate "$UDID" com.dipaknehe.stockvalue
-          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -AppleLanguages "(es)" -OpenURL "https://stock-value-analysis.vercel.app/?t=KO&lang=es"
+          xcrun simctl launch "$UDID" com.dipaknehe.stockvalue -AppleLanguages "(es)" -OpenURL "https://www.equitymoat.com/?t=KO&lang=es"
           sleep 25
           xcrun simctl io "$UDID" screenshot screenshots/3-spanish.png
 

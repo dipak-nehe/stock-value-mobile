@@ -45,7 +45,7 @@ How the two native apps are tested: what is covered, at which level, on which de
 | Unit | `android/app/src/test/` (21) | `ios/StockValueTests/` (22) | Link policy incl. lookalike hosts and blocked schemes, results-page detection, alert rules, reading the API response, saving (and capping) the watchlist, the API version |
 | Instrumented | `android/app/src/androidTest/` (11, Espresso + Espresso-Web + WorkManager testing, against a local MockWebServer) | CI launch check: install, open, screenshot the start page, KO's results and Spanish | The shell loads, links route correctly, offline recovers; watching, checking and notifying work on a device |
 | End-to-end, mock suite | `e2e/android/specs/mock/` (20) | `e2e/ios/specs/mock/` (20) | The installed app driven like a person, against a local copy of the web app whose "SEC filings" the tests change to trigger real notifications |
-| End-to-end, live suite | `e2e/android/specs/live/` (14) | `e2e/ios/specs/live/` (14) | The installed app against https://stock-value-analysis.vercel.app with real SEC data: analysis, compare, every tab, a wrong ticker, axe-core, Spanish |
+| End-to-end, live suite | `e2e/android/specs/live/` (14) | `e2e/ios/specs/live/` (14) | The installed app against https://www.equitymoat.com with real SEC data: analysis, compare, every tab, a wrong ticker, axe-core, Spanish |
 
 ## 4. Environments and test data
 

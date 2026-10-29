@@ -6,7 +6,7 @@ import { checkWebPage } from '../../support/a11y.js';
 import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
-const LIVE = 'https://stock-value-analysis.vercel.app/';
+const LIVE = 'https://www.equitymoat.com/';
 
 /**
  * The web app's compare page inside the Android app (live site, real SEC data): it opens in the app from a result,

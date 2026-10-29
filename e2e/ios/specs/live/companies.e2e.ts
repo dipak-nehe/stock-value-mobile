@@ -47,7 +47,7 @@ describe('All companies in the app (live site)', () => {
 
     it('the All companies page passes axe-core inside the app', async () => {
         await resetApp();
-        await launchApp({ open: 'https://stock-value-analysis.vercel.app/companies.html?q=coca' });
+        await launchApp({ open: 'https://www.equitymoat.com/companies.html?q=coca' });
         const violations = await inWebView(async () => {
             await expect(WebCompanies.rows[0]).toBeDisplayed({ wait: 60_000 });
             return checkWebPage('live All companies page');

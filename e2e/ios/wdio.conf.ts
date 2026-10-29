@@ -5,7 +5,7 @@ import { screenshot, VideoRecorder } from './support/report.js';
 /**
  * WebdriverIO + Appium (XCUITest) for the iOS app.
  *   npm run test:mock   exact checks against a local mock of the web app (the simulator reaches it as localhost)
- *   npm run test:live   smoke tests against https://stock-value-analysis.vercel.app
+ *   npm run test:live   smoke tests against https://www.equitymoat.com
  * Needs Xcode with an iOS simulator, and the app built for it (see the README's "End-to-end tests").
  *
  * Every test gets a video and a final screenshot in the Allure report; failures also get the screen's UI tree.

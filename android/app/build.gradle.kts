@@ -19,7 +19,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // The web app this shell wraps. Tests point the debug build at a local server instead.
         // TO USE ANOTHER SITE: change the address here (keep the trailing slash and the \" quotes).
-        buildConfigField("String", "SITE_URL", "\"https://stock-value-analysis.vercel.app/\"")
+        buildConfigField("String", "SITE_URL", "\"https://www.equitymoat.com/\"")
     }
 
     buildFeatures {

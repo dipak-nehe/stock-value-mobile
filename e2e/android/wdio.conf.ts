@@ -5,7 +5,7 @@ import { attachVideo, screenshot, startVideo } from './support/report.js';
 /**
  * WebdriverIO + Appium (UiAutomator2) for the Android app.
  *   npm run test:mock   exact checks against a local mock of the web app (reached from the device via `adb reverse`)
- *   npm run test:live   a smoke test against https://stock-value-analysis.vercel.app
+ *   npm run test:live   a smoke test against https://www.equitymoat.com
  * Needs a running emulator or USB-connected phone and the debug APK (`./gradlew assembleDebug` in the repo root).
  */
 export const config: WebdriverIO.Config = {

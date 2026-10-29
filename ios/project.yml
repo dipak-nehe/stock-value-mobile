@@ -40,7 +40,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         # The web app this shell wraps (tests override it with the -SiteURL launch argument in debug builds).
-        SiteURL: https://stock-value-analysis.vercel.app/
+        SiteURL: https://www.equitymoat.com/
         UILaunchScreen: {}
         UIApplicationSupportsIndirectInputEvents: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]

@@ -2,7 +2,7 @@
 
 How the Android app is built, how its parts talk to each other and to the web app, and how it is tested and shipped. Written for engineers joining the project and for anyone reviewing it; the [README](../README.md) covers building and running.
 
-**In one sentence:** a small native Kotlin app that shows the web app ([stock-value-analysis.vercel.app](https://stock-value-analysis.vercel.app)) in a WebView, and adds what a website can't do: a watchlist that checks SEC filings in the background and sends notifications.
+**In one sentence:** a small native Kotlin app that shows the web app ([www.equitymoat.com](https://www.equitymoat.com)) in a WebView, and adds what a website can't do: a watchlist that checks SEC filings in the background and sends notifications.
 
 ---
 
@@ -296,6 +296,6 @@ flowchart LR
 ## 10. Limitations and next steps
 
 - **Not on the Play Store yet:** needs a release signing key, a Google Play developer account, a store listing and a privacy policy.
-- **App Links:** opening `stock-value-analysis.vercel.app` links from other apps directly in this app needs an `assetlinks.json` on the site.
+- **App Links:** opening `www.equitymoat.com` links from other apps directly in this app needs an `assetlinks.json` on the site.
 - **Real-device testing:** everything so far ran on emulators.
 - **Ideas:** home-screen widget for the watchlist, share-a-ticker-to-the-app, saved analyses for offline reading.

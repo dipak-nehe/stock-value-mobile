@@ -15,7 +15,7 @@ enum AppInfo {
         #if DEBUG
         if let override = UserDefaults.standard.string(forKey: "SiteURL"), !override.isEmpty { return override }
         #endif
-        return Bundle.main.object(forInfoDictionaryKey: "SiteURL") as? String ?? "https://stock-value-analysis.vercel.app/"
+        return Bundle.main.object(forInfoDictionaryKey: "SiteURL") as? String ?? "https://www.equitymoat.com/"
     }
 
     /// Debug builds only: a page to open at launch (`-OpenURL …`), like tapping a notification.

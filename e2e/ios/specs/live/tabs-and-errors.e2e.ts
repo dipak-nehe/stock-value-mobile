@@ -5,7 +5,7 @@ import WebAnalysis, { TABS, type Tab } from '../../../shared/webpages/WebAnalysi
 import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
-const LIVE = 'https://stock-value-analysis.vercel.app/';
+const LIVE = 'https://www.equitymoat.com/';
 
 /** What each tab must show for Coca-Cola (live site, real SEC data). */
 const CONTENT: Record<Tab, () => Promise<void>> = {

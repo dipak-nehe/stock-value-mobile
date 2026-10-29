@@ -4,7 +4,7 @@ import WebAnalysis from '../../../shared/webpages/WebAnalysisPage.js';
 import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
-const SITE = 'https://stock-value-analysis.vercel.app';
+const SITE = 'https://www.equitymoat.com';
 const MENU = ['Stocks', 'Compare', 'S&P 500', 'All companies', 'Funds & ETFs', 'My portfolio'];
 
 /**

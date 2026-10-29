@@ -35,7 +35,7 @@ class SitePolicy(siteUrl: String) {
     }
 
     // Same scheme, host (any letter case) and port as the web app. Lookalike hosts such as
-    // "stock-value-analysis.vercel.app.example.com" don't match, and neither does plain http.
+    // "www.equitymoat.com.example.com" don't match, and neither does plain http.
     private fun isSameSite(uri: URI, scheme: String) =
         scheme == site.scheme.lowercase() &&
             uri.host != null && uri.host.equals(site.host, ignoreCase = true) &&

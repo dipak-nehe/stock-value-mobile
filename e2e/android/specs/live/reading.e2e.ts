@@ -3,7 +3,7 @@ import WebAnalysis from '../../../shared/webpages/WebAnalysisPage.js';
 import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
-const SITE = 'https://stock-value-analysis.vercel.app';
+const SITE = 'https://www.equitymoat.com';
 
 /**
  * Reading and keeping a result inside the Android app (live site): the link to the latest annual report and the

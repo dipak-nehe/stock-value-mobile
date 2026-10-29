@@ -2,7 +2,7 @@
 
 [![android](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/android.yml/badge.svg)](https://github.com/dipak-nehe/stock-value-mobile/actions/workflows/android.yml)
 
-An Android app for [10-Year Stock Value Analysis](https://stock-value-analysis.vercel.app): ten years of a company's SEC filings, red flags, filing history, Buffett & Graham checklists and a side-by-side compare page. The app is a small native shell around a WebView, so it always shows the current version of the web app with no separate release needed for content changes.
+An Android app for [10-Year Stock Value Analysis](https://www.equitymoat.com): ten years of a company's SEC filings, red flags, filing history, Buffett & Graham checklists and a side-by-side compare page. The app is a small native shell around a WebView, so it always shows the current version of the web app with no separate release needed for content changes.
 
 **How it's built:** [docs/architecture.md](docs/architecture.md): system context, components, the page and alert flows, data, security, testing and CI, with diagrams.
 
@@ -96,7 +96,7 @@ GitHub Actions (`.github/workflows/android.yml` at the repo root; it runs when `
     - the full watch → notification → open → unwatch flow;
     - **accessibility**: on every native screen (start, results, Watchlist with a company and empty, offline) each tappable control needs a screen-reader label and a 48dp touch target (`support/a11y.ts` reads the UI tree); the page inside the WebView is checked with **axe-core** (WCAG 2.1 A/AA);
     - **Spanish**: the app is switched to Spanish with Android 13+'s per-app language setting; toolbar, Watchlist, a real notification and the offline screen must be in Spanish.
-  - `live`: a **tab tour** (every tab opens alone with its content, as in the web app's own test), a **wrong ticker** (the error shows where you can see it, the address follows, and the app won't watch it), plus: against https://stock-value-analysis.vercel.app with real SEC data: loads the site, analyses KO, shows the Watch star, shows the site in Spanish inside the app, and runs axe-core on the live start and results pages. **Compare:** opens *Compare with another stock* inside the app with KO loaded, compares PEP (cards, key figures, chart), runs axe-core on the compare page, follows *Open full analysis* and Back (the Watch star appears on a company page and disappears on the comparison), and checks the comparison in Spanish.
+  - `live`: a **tab tour** (every tab opens alone with its content, as in the web app's own test), a **wrong ticker** (the error shows where you can see it, the address follows, and the app won't watch it), plus: against https://www.equitymoat.com with real SEC data: loads the site, analyses KO, shows the Watch star, shows the site in Spanish inside the app, and runs axe-core on the live start and results pages. **Compare:** opens *Compare with another stock* inside the app with KO loaded, compares PEP (cards, key figures, chart), runs axe-core on the compare page, follows *Open full analysis* and Back (the Watch star appears on a company page and disappears on the comparison), and checks the comparison in Spanish.
 - **Structure:** `wdio.conf.ts` (runner, Appium service, reporters, video and screenshots per test), `support/capabilities.ts` (Android/UiAutomator2 capabilities), `support/app.ts` (launch with intent extras, reset, adb, WebView switching, selector helpers), `screens/` (native screen objects: `MainScreen`, `WatchlistScreen`, `Notifications`), `webpages/` (page objects for the web content inside the WebView: `WebAnalysisPage`, `WebComparePage`, `MockPage`), `specs/mock/` and `specs/live/`.
 - **Page objects only:** the specs contain no selectors; every element is defined once in `screens/` or `webpages/`. Native screen objects and web page objects take a language (`new MainScreen('es')`, `new WebAnalysisPage('es')`), so the Spanish specs call the same methods.
 - **Locator order.** Native screens: accessibility id (`~`, what TalkBack reads) → resource-id → UiSelector text, never XPath. Web content: accessible name (`aria/`, like Playwright's getByRole/getByLabel) for controls → `data-testid` for content → `#id` only where the name is incidental text (arrows, counts) or shared with another element, commented in the page object.
@@ -143,7 +143,7 @@ docs/architecture.md     architecture with diagrams
 ## Not included yet
 
 - **Play Store release:** needs a signing key, a release build and a Google Play developer account ($25 one-time).
-- **App Links** (opening `stock-value-analysis.vercel.app` links from other apps straight in this app): needs a signed release key and an `assetlinks.json` file on the website.
+- **App Links** (opening `www.equitymoat.com` links from other apps straight in this app): needs a signed release key and an `assetlinks.json` file on the website.
 
 ## License
 

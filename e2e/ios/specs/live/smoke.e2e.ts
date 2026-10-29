@@ -4,13 +4,13 @@ import WebAnalysis, { WebAnalysisPage } from '../../../shared/webpages/WebAnalys
 import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
-const LIVE = 'https://stock-value-analysis.vercel.app/';
+const LIVE = 'https://www.equitymoat.com/';
 
 /** Against the real site: proves the app works with the live web app and SEC data, not only with the mock. */
 describe('Live site smoke test', () => {
     before(async () => {
         await resetApp();
-        await launchApp(); // no override: https://stock-value-analysis.vercel.app
+        await launchApp(); // no override: https://www.equitymoat.com
     });
 
     it('loads the live web app and analyses a company from real SEC data', async () => {
