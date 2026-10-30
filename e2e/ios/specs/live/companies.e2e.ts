@@ -19,7 +19,7 @@ describe('All companies in the app (live site)', () => {
     it('opens the All companies page inside the app from the header, with the full list', async () => {
         await inWebView(async () => {
             await WebAnalysis.waitUntilReady();
-            await expect(WebAnalysis.companiesLink).toHaveText('All companies');
+            await expect(WebAnalysis.companiesLink).toHaveText('US companies');
             await WebAnalysis.companiesLink.click();
         });
         // A new page: look up its context again.

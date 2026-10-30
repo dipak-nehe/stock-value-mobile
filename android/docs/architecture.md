@@ -1,4 +1,4 @@
-# Architecture: 10-Year Stock Value Analysis for Android
+# Architecture: EquityMoat for Android
 
 How the Android app is built, how its parts talk to each other and to the web app, and how it is tested and shipped. Written for engineers joining the project and for anyone reviewing it; the [README](../README.md) covers building and running.
 

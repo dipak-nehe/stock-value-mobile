@@ -5,7 +5,7 @@ import { inWebView, launchApp, resetApp } from '../../support/app.js';
 import { screenshot } from '../../support/report.js';
 
 const SITE = 'https://www.equitymoat.com';
-const MENU = ['Stocks', 'Compare', 'S&P 500', 'All companies', 'EU companies', 'Funds & ETFs', 'My portfolio'];
+const MENU = ['Stocks', 'Compare stocks', 'S&P 500', 'US companies', 'Funds & ETFs', 'My portfolio'];
 
 /**
  * The web app's main menu and a bank's valuation inside the iOS app (live site). The menu reads in task order with
@@ -34,7 +34,7 @@ describe('Main menu and a bank valuation in the app (live site)', () => {
         // A new page: look up its context again.
         await inWebView(async () => {
             await expect(browser).toHaveUrl(expect.stringContaining('/compare.html'), { wait: 30_000 });
-            expect((await WebAnalysis.menu()).current).toBe('Compare');
+            expect((await WebAnalysis.menu()).current).toBe('Compare stocks');
         }, { retries: 1 });
         await expect(MainScreen.pageArea).toBeDisplayed(); // still in the app, not the browser
         await screenshot('Compare from the menu');

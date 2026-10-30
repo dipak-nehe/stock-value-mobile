@@ -1,4 +1,4 @@
-# Architecture: 10-Year Stock Value Analysis for iOS
+# Architecture: EquityMoat for iOS
 
 How the iOS app is built, how its parts talk to each other and to the web app, and how it's tested and shipped. Written for engineers joining the project and for anyone reviewing it; the [README](../README.md) covers building and running. The [Android app](../../android/) follows the same design; section 9 lists where iOS differs.
 

@@ -16,7 +16,7 @@ describe('Live site smoke test', () => {
     it('loads the live web app and analyses a company from real SEC data', async () => {
         // One switch into the page for the whole web flow.
         await inWebView(async () => {
-            await expect(WebAnalysis.siteTitle).toHaveText(expect.stringContaining('10-Year Stock Value Analysis'), { wait: 60_000 });
+            await expect(WebAnalysis.siteTitle).toHaveText(expect.stringContaining('EquityMoat'), { wait: 60_000 });
             await WebAnalysis.waitUntilReady();
             // Analyze is ready as soon as the page's script runs; with nothing typed it shows a hint instead of searching
             await expect(WebAnalysis.analyzeButton).toBeEnabled();

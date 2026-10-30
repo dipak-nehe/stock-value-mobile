@@ -56,7 +56,7 @@ export class WebAnalysisPage {
     }
 
     /** #id: the link text is hard-coded copy with an arrow. */
-    /** "All companies" in the header (after S&P 500): every listed company with its exchange and industry. */
+    /** "US companies" in the header (after S&P 500): every listed company with its exchange and industry. */
     get companiesLink() {
         return $('a[data-companies-link]');
     }
@@ -78,7 +78,7 @@ export class WebAnalysisPage {
         });
     }
 
-    /** "Compare" in the main menu (the results page's own "Compare with another stock" link is compareLink). */
+    /** "Compare stocks" in the main menu (the results page's own "Compare with another stock" link is compareLink). */
     get compareMenuLink() {
         return $('a[data-compare-link]');
     }
