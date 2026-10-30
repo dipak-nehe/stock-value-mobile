@@ -12,7 +12,7 @@ How the Android app is built, how its parts talk to each other and to the web ap
 flowchart LR
     user(["Person on an<br/>Android phone"])
     subgraph phone["Phone"]
-        app["Stock Value app<br/>(Kotlin, WebView shell)"]
+        app["EquityMoat app<br/>(Kotlin, WebView shell)"]
         browser["Phone's browser"]
         notif["Notification shade"]
     end
@@ -235,7 +235,7 @@ flowchart LR
     subgraph device["Android emulator"]
         u2["UiAutomator2 server"]
         cd["chromedriver ⇄ WebView<br/>(WEBVIEW_com.dipaknehe.stockvalue)"]
-        theapp["Stock Value app (debug)"]
+        theapp["EquityMoat app (debug)"]
     end
     live[("Live web app")]
 

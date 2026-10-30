@@ -12,7 +12,7 @@ How the iOS app is built, how its parts talk to each other and to the web app, a
 flowchart LR
     user(["Person on an<br/>iPhone or iPad"])
     subgraph phone["iPhone / iPad"]
-        app["Stock Value app<br/>(SwiftUI, WKWebView)"]
+        app["EquityMoat app<br/>(SwiftUI, WKWebView)"]
         safari["Safari / Mail"]
         notif["Notification Center"]
         bg["iOS background scheduler<br/>(BGTaskScheduler)"]

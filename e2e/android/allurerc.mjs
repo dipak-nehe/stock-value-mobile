@@ -2,12 +2,12 @@
 import { defineConfig } from "allure";
 
 export default defineConfig({
-  name: "Stock Value Android · end-to-end report",
+  name: "EquityMoat Android · end-to-end report",
   output: "./allure-report",
   plugins: {
     awesome: {
       options: {
-        reportName: "Stock Value Android · end-to-end report",
+        reportName: "EquityMoat Android · end-to-end report",
         reportLanguage: "en",
         groupBy: ["parentSuite", "suite", "subSuite"],
         singleFile: true, // one self-contained index.html: opens straight from a downloaded CI artifact

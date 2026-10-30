@@ -34,7 +34,7 @@ targets:
     info:
       path: StockValue/Info.plist
       properties:
-        CFBundleDisplayName: Stock Value
+        CFBundleDisplayName: EquityMoat
         CFBundleDevelopmentRegion: en
         CFBundleLocalizations: [en, es]
         CFBundleShortVersionString: $(MARKETING_VERSION)

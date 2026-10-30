@@ -1,5 +1,5 @@
 /* Spanish texts for the app's own screens and notifications (the web page translates itself). Same keys as the Android strings.xml. */
-"app_name" = "Stock Value";
+"app_name" = "EquityMoat";
 "offline_title" = "No se puede acceder al sitio";
 "offline_message" = "Comprueba tu conexión a internet y vuelve a intentarlo.";
 "retry" = "Reintentar";
