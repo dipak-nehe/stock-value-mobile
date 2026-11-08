@@ -35,7 +35,7 @@ flowchart LR
 
 - **No backend of its own.** The app reuses the web app: its pages for everything the user sees, and its cached JSON API for background checks. SEC is only contacted by the web app's function, and usually not even then, because results are stored in Redis and the CDN.
 - **No accounts, no server-side watchlist.** The watchlist lives on the phone.
-- **One API contract:** `/api/financials?ticker=X&v=6`. The app's `StatusApi.API_VERSION` must equal `API_VERSION` in the web app's `public/js/page.js` (a unit test pins it), so both share the CDN cache and the app always sees the fields it reads.
+- **One API contract:** `/api/financials?ticker=X&v=19`. The app's `StatusApi.API_VERSION` must equal `API_VERSION` in the web app's `src/page.ts` (a unit test pins it), so both share the CDN cache and the app always sees the fields it reads.
 
 ---
 

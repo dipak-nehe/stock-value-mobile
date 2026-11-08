@@ -3,8 +3,8 @@ import Foundation
 /// Reads a company's filing status from the web app's API: the same cached endpoint the web page uses, so the
 /// app never talks to SEC directly. Only `latestReport` and `secHistory.events` are used.
 struct StatusAPI {
-    /// Must match API_VERSION in the web app (public/js/page.js). JSONTests pins it.
-    static let apiVersion = 6
+    /// Must match API_VERSION in the web app (src/page.ts). JSONTests pins it.
+    static let apiVersion = 19
 
     enum Failure: Error, Equatable {
         case notFound

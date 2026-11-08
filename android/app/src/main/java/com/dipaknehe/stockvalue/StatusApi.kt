@@ -9,7 +9,7 @@ import java.net.URLEncoder
 
 /**
  * Reads a company's filing status from the web app's API: the same cached endpoint the web page uses
- * (/api/financials?ticker=KO&v=6), so the app never talks to SEC directly.
+ * (/api/financials?ticker=KO&v=19), so the app never talks to SEC directly.
  *
  * Only two parts of the response are used: `latestReport` (the newest 10-K/10-Q/20-F/40-F) and
  * `secHistory.events` (restatement warnings, late filings, …). See [parse].
@@ -44,10 +44,10 @@ class StatusApi(private val siteUrl: String) {
 
     companion object {
         /**
-         * Must match API_VERSION in the web app (public/js/page.js), so both share the CDN cache and the app sees
+         * Must match API_VERSION in the web app (src/page.ts), so both share the CDN cache and the app sees
          * the fields it reads. When the web app bumps its version, change this too (JsonTest checks the number).
          */
-        const val API_VERSION = 6
+        const val API_VERSION = 19
 
         /** Reads the parts of the API's JSON that alerts need. Unit-tested in JsonTest with a real response. */
         fun parse(json: String): CompanyStatus {

@@ -37,7 +37,7 @@ flowchart LR
 
 - **No backend of its own:** the app reuses the web app's pages and its cached JSON API. SEC is only contacted by the web app's function.
 - **No accounts, no server-side watchlist:** the watchlist lives on the device.
-- **One API contract:** `/api/financials?ticker=X&v=6`. `StatusAPI.apiVersion` must equal `API_VERSION` in the web app's `public/js/page.js` (a unit test pins it).
+- **One API contract:** `/api/financials?ticker=X&v=19`. `StatusAPI.apiVersion` must equal `API_VERSION` in the web app's `src/page.ts` (a unit test pins it).
 
 ---
 

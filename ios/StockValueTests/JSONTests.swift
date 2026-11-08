@@ -55,7 +55,7 @@ final class JSONTests: XCTestCase {
     }
 
     func testTheAPIVersionMatchesTheWebApp() {
-        // public/js/page.js API_VERSION; a mismatch would split the CDN cache and could miss new fields
-        XCTAssertEqual(StatusAPI.apiVersion, 6)
+        // src/page.ts API_VERSION; a mismatch would split the CDN cache and could miss new fields
+        XCTAssertEqual(StatusAPI.apiVersion, 19)
     }
 }
