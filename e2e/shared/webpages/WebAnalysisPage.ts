@@ -122,7 +122,7 @@ export class WebAnalysisPage {
         return $('[data-testid="search-hint"]');
     }
 
-    /** The "Durable advantage" tab's "Meets N of 13 criteria" score. */
+    /** The "Durable advantage" tab's "Meets N of 14 criteria" score. */
     get durableScore() {
         return $('[data-testid="durable-score"]');
     }
